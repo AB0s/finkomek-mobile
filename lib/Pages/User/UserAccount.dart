@@ -77,43 +77,45 @@ class _UserAccountPageState extends State<UserAccountPage>
                 SizedBox(
                   width: MediaQuery.of(context).size.width * 0.13,
                 ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$_fname \n$_lname',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        color: Color(0xFF0085A1),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '$_fname \n$_lname',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                          color: Color(0xFF0085A1),
+                        ),
                       ),
-                    ),
-                    Text(_email),
-                    const Text('+77777777'),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: _logout,
-                        style: ButtonStyle(
-                          shape: MaterialStateProperty.all(
-                            RoundedRectangleBorder(
-                              // Change your radius here
-                              borderRadius: BorderRadius.circular(13),
+                      Text(_email),
+                      const Text('+77777777'),
+                      const SizedBox(
+                        height: 5,
+                      ),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: _logout,
+                          style: ButtonStyle(
+                            shape: MaterialStateProperty.all(
+                              RoundedRectangleBorder(
+                                // Change your radius here
+                                borderRadius: BorderRadius.circular(13),
+                              ),
                             ),
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                const Color(0xFF0085A1)),
                           ),
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              const Color(0xFF0085A1)),
+                          child: const Text(
+                            'Logout',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
-                        child: const Text(
-                          'Logout',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ), // Placeholder for phone number
-                  ],
+                      ), // Placeholder for phone number
+                    ],
+                  ),
                 )
               ],
             ),
