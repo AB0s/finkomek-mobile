@@ -3,10 +3,15 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../Widgets/CustomBanner.dart';
 import '../HomePage.dart';
-import 'RegisterPage.dart'; // Import the RegisterPage
+import 'RegistrationPage.dart';
 
 class LoginScreen extends StatefulWidget {
+  final bool showBanner;
+
+  const LoginScreen({Key? key, this.showBanner = false}) : super(key: key);
+
   @override
   _LoginScreenState createState() => _LoginScreenState();
 }
@@ -17,6 +22,35 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   String _errorMessage = '';
 
+  @override
+  void initState() {
+    super.initState();
+    if (widget.showBanner) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showLoginSuccessBanner();
+      });
+    }
+  }
+
+  void _showLoginSuccessBanner() {
+    OverlayState? overlayState = Overlay.of(context);
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => const Positioned(
+        top: kToolbarHeight + 20,
+        left: 0,
+        right: 0,
+        child: SuccessBanner(
+            message: 'Вы зарегистрированы,теперь \n войдите в свой аккаунт'),
+      ),
+    );
+
+    overlayState?.insert(overlayEntry);
+
+    Future.delayed(Duration(seconds: 3), () {
+      overlayEntry.remove();
+    });
+  }
+
   Future<void> _login() async {
     setState(() {
       _isLoading = true;
@@ -24,7 +58,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     final response = await http.post(
-      Uri.parse('https://kamal-golang-back-b154d239f542.herokuapp.com/auth/login'),
+      Uri.parse(
+          'https://kamal-golang-back-b154d239f542.herokuapp.com/auth/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': _emailController.text,
@@ -42,7 +77,8 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('lname', responseBody['lname']);
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomePage(showLoginSuccess: true)),
+          MaterialPageRoute(
+              builder: (context) => HomePage(showLoginSuccess: true)),
         );
       } else {
         setState(() {
@@ -81,9 +117,9 @@ class _LoginScreenState extends State<LoginScreen> {
             _isLoading
                 ? CircularProgressIndicator()
                 : ElevatedButton(
-              onPressed: _login,
-              child: Text('Login'),
-            ),
+                    onPressed: _login,
+                    child: Text('Login'),
+                  ),
             SizedBox(height: 20),
             Text(
               _errorMessage,
@@ -105,4 +141,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

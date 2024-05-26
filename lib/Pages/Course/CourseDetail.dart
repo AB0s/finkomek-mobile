@@ -1,26 +1,66 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class CourseDetailPage extends StatefulWidget {
-  final String title;
-  final String description;
-  final String courseImage;
+  final String courseId;
 
-  const CourseDetailPage(
-      {Key? key,
-      required this.title,
-      required this.description,
-      required this.courseImage})
-      : super(key: key);
+  const CourseDetailPage({Key? key, required this.courseId}) : super(key: key);
 
   @override
   State<CourseDetailPage> createState() => _CourseDetailPageState();
 }
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
+  bool isLoading = true;
   bool _isTapped = false;
+  String title = '';
+  String description = '';
+  String courseImage = '';
+  int cost = 0;
+  String moduleCount = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchCourseDetails();
+  }
+
+  Future<void> fetchCourseDetails() async {
+    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/course/${widget.courseId}';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(utf8.decode(response.bodyBytes));
+        if (data['status'] == 'success') {
+          setState(() {
+            final course = data['course'];
+            title = course['name'];
+            description = course['short_description'];
+            courseImage = 'https://kamal-golang-back-b154d239f542.herokuapp.com' + course['image_url'];
+            cost = course['cost'];
+            moduleCount = course['module_count'];
+            isLoading = false;
+          });
+        } else {
+          // Handle error
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } else {
+        // Handle error
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      // Handle error
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,12 +73,10 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           style: ButtonStyle(
             shape: MaterialStateProperty.all(
               RoundedRectangleBorder(
-                // Change your radius here
                 borderRadius: BorderRadius.circular(13),
               ),
             ),
-            backgroundColor:
-                MaterialStateProperty.all<Color>(const Color(0xFF0085A1)),
+            backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF0085A1)),
           ),
           onPressed: () {},
           child: const Center(
@@ -75,7 +113,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
           )
         ],
       ),
-      body: SingleChildScrollView(
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -98,8 +138,31 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 height: MediaQuery.of(context).size.height * 0.28,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: SvgPicture.asset(
-                    widget.courseImage,
+                  child: courseImage.isNotEmpty
+                      ? Image.network(
+                    courseImage,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/placeholder.png', // Path to your placeholder image
+                        fit: BoxFit.cover,
+                      );
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) {
+                        return child;
+                      }
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                              : null,
+                        ),
+                      );
+                    },
+                  )
+                      : Image.asset(
+                    'assets/images/placeholder.png', // Path to your placeholder image
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -113,7 +176,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.title,
+                    title,
                     style: const TextStyle(
                         color: Color(0xFF0085A1),
                         fontWeight: FontWeight.bold,
@@ -123,7 +186,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                     height: 20,
                   ),
                   Text(
-                    widget.description,
+                    description,
                     style: const TextStyle(fontSize: 16),
                   ),
                   const SizedBox(
@@ -135,8 +198,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                         borderRadius: BorderRadius.circular(16)),
                     child: const FittedBox(
                       child: Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+                        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
                         child: Row(
                           children: [
                             Icon(

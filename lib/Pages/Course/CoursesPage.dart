@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:llf/Widgets/CourseCard.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-import '../../Calculators/NetWorth.dart';
+import '../../Models/Course.dart';
+import 'CourseDetail.dart';  // Add this import
 
 class CoursesPage extends StatefulWidget {
   const CoursesPage({Key? key}) : super(key: key);
@@ -12,34 +14,45 @@ class CoursesPage extends StatefulWidget {
 }
 
 class _CoursesPageState extends State<CoursesPage> {
-  int _selectedIndex = 0;
+  List<Course> courses = [];
+  bool isLoading = true;
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+  @override
+  void initState() {
+    super.initState();
+    fetchCourses();
   }
 
-  final List<String> title = <String>[
-    'Финанстық қауіпсіздікке кіріспе:',
-    'Финанстық қауіпсіздікке кіріспе  ',
-    'Финанстық қауіпсіздікке кіріспе',
-    'Retirement Savings Calculator'
-  ];
-  final List<String> subTitle = <String>[
-    'Do you know your worth?',
-    'I can help you calculate monthly expenses regarding all the nuances',
-    'Planning ahead requires calculations',
-    'Your government failed you with pensions? - No problemo!'
-  ];
-  final List<int> colorCodes = [0xFF0085A1, 0xFF00343F, 0xFFFFCA03, 0xFF0085A1];
-
-  final List<String> courseImages = <String>[
-    'assets/1Course.svg',
-    'assets/2Course.svg',
-    'assets/3Course.svg',
-    'assets/1Course.svg',
-  ];
+  Future<void> fetchCourses() async {
+    const url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/course/get-all-courses';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(utf8.decode(response.bodyBytes));  // Ensure UTF-8 encoding
+        if (data['status'] == 'success') {
+          setState(() {
+            courses = (data['courses'] as List).map((courseJson) => Course.fromJson(courseJson)).toList();
+            isLoading = false;
+          });
+        } else {
+          // Handle error
+          setState(() {
+            isLoading = false;
+          });
+        }
+      } else {
+        // Handle error
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      // Handle error
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,10 +93,10 @@ class _CoursesPageState extends State<CoursesPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Курстар',
+            const Text('Kurstar',
                 style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
             Container(
-              height: 2, // Adjust the height of the line
+              height: 2,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -96,36 +109,36 @@ class _CoursesPageState extends State<CoursesPage> {
               ),
             ),
             Expanded(
-              child: ListView.separated(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.separated(
                 padding: const EdgeInsets.all(8),
-                itemCount: title.length,
+                itemCount: courses.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return CourseCard(
-                      title: title[index],
-                      description: subTitle[index],
-                      colorCode: colorCodes[index], courseImage: courseImages[index],);
+                  final course = courses[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => CourseDetailPage(courseId: course.id),
+                        ),
+                      );
+                    },
+                    child: CourseCard(
+                      title: course.name,
+                      description: course.shortDescription,
+                      colorCode: 0xFF0085A1,
+                      courseImage: 'https://kamal-golang-back-b154d239f542.herokuapp.com' + course.imageUrl,
+                    ),
+                  );
                 },
                 separatorBuilder: (BuildContext context, int index) =>
-                    const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
+                const Padding(padding: EdgeInsets.symmetric(vertical: 5)),
               ),
-            )
+            ),
           ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        iconSize: 40,
-        selectedItemColor: Color(0xFF339db4),
-        unselectedItemColor: Color(0xFFa7dbe5),
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.message), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.calculate), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.menu), label: '')
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
       ),
     );
   }

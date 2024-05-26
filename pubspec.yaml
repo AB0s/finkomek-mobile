@@ -54,6 +54,8 @@ dev_dependencies:
   date_picker_timeline: ^1.2.6
   shared_preferences: ^2.2.3
   http: ^1.2.1
+  provider: ^6.1.2
+  flutter_pw_validator: ^1.6.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
