@@ -53,7 +53,6 @@ class _CoursesPageState extends State<CoursesPage> {
       });
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

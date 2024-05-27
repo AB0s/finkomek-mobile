@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../Pages/Calcualtor/CalculatorsPage.dart';
+import '../../Pages/ChatPage.dart';
 import '../../Pages/Course/CoursesPage.dart';
 import '../../Pages/Expert/ExpertsPage.dart';
 
@@ -56,7 +57,7 @@ class _RowOfScreensState extends State<RowOfScreens> {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                          const CalculatorsPage()));
+                          ChatPage()));
                 },
               ),
               Column(
