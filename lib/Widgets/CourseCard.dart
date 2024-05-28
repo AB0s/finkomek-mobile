@@ -25,8 +25,8 @@ class CourseCard extends StatelessWidget {
           children: [
             // Handling network image with error handling
             courseImage.isNotEmpty
-                ? Image.network(
-              courseImage,
+                ? Image.asset(
+              "assets/images/placeholder.png",
               height: 100,
               width: double.infinity,
               fit: BoxFit.cover,
