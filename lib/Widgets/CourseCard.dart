@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CourseCard extends StatelessWidget {
   final String title;
@@ -16,6 +17,7 @@ class CourseCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(courseImage.substring(1));
     return Card(
       color: Color(colorCode),
       child: Padding(
@@ -23,25 +25,11 @@ class CourseCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Handling network image with error handling
-            courseImage.isNotEmpty
-                ? Image.asset(
-              "assets/images/placeholder.png",
+            SvgPicture.asset(
+              courseImage.substring(1),
               height: 100,
               width: double.infinity,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  height: 100,
-                  color: Colors.grey,
-                  child: Center(child: Icon(Icons.error)),
-                );
-              },
-            )
-                : Container(
-              height: 100,
-              color: Colors.grey,
-              child: Center(child: Icon(Icons.image)),
             ),
             const SizedBox(height: 8),
             Text(

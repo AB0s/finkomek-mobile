@@ -128,7 +128,7 @@ class _CoursesPageState extends State<CoursesPage> {
                       title: course.name,
                       description: course.shortDescription,
                       colorCode: 0xFF0085A1,
-                      courseImage: 'https://kamal-golang-back-b154d239f542.herokuapp.com' + course.imageUrl,
+                      courseImage: course.imageUrl,
                     ),
                   );
                 },

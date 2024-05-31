@@ -92,54 +92,26 @@ class _CourseContentPageState extends State<CourseContentPage> {
             Expanded(
               child: TabBarView(
                 children: [
-                  for (var module in courseContent['modules'])
+                  for (var i = 0; i < courseContent['modules'].length; i++)
                     ListView.builder(
-                      itemCount: module['lessons'].length,
+                      itemCount: courseContent['modules'][i]['lessons'].length + 1,
                       itemBuilder: (context, index) {
-                        var lesson = module['lessons'][index];
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Card(
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Урок ${index + 1}: ${lesson['lesson_name']}',
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  if (lesson['lesson_type'] == 'vid' &&
-                                      lesson['video_path'].isNotEmpty)
-                                    Container(
-                                      height: 200,
-                                      color: Colors.black,
-                                      child: Center(
-                                        child: Text(
-                                          'Video: ${lesson['video_path']}',
-                                          style: const TextStyle(
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  if (lesson['lesson_type'] == 'article')
-                                    ...lesson['lesson_content']
-                                        .map<Widget>((content) {
-                                      return Padding(
-                                        padding:
-                                        const EdgeInsets.only(bottom: 10.0),
-                                        child: Text(content['paragraph']),
-                                      );
-                                    }).toList(),
-                                ],
+                        if (index == 0) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              'Модуль ${i + 1}',
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                          ),
+                          );
+                        }
+                        var lesson = courseContent['modules'][i]['lessons'][index - 1];
+                        return LessonCard(
+                          lesson: lesson,
+                          lessonIndex: index,
                         );
                       },
                     ),
@@ -148,6 +120,111 @@ class _CourseContentPageState extends State<CourseContentPage> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class LessonCard extends StatefulWidget {
+  final Map<String, dynamic> lesson;
+  final int lessonIndex;
+
+  const LessonCard({Key? key, required this.lesson, required this.lessonIndex})
+      : super(key: key);
+
+  @override
+  _LessonCardState createState() => _LessonCardState();
+}
+
+class _LessonCardState extends State<LessonCard> {
+  bool isExpanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Card(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Урок ${widget.lessonIndex}: ${widget.lesson['lesson_name']}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            if (widget.lesson['lesson_type'] == 'vid' &&
+                widget.lesson['video_path'].isNotEmpty)
+              Container(
+                height: 200,
+                color: Colors.black,
+                child: Center(
+                  child: Text(
+                    'Video: ${widget.lesson['video_path']}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            if (widget.lesson['lesson_type'] == 'article')
+              AnimatedCrossFade(
+                firstChild: _buildCollapsedContent(),
+                secondChild: _buildExpandedContent(),
+                crossFadeState: isExpanded
+                    ? CrossFadeState.showSecond
+                    : CrossFadeState.showFirst,
+                duration: const Duration(milliseconds: 300),
+              ),
+            if (widget.lesson['lesson_type'] == 'article')
+              Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
+                  onPressed: () {
+                    setState(() {
+                      isExpanded = !isExpanded;
+                    });
+                  },
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCollapsedContent() {
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 100.0), // Set a maximum height for collapsed content
+      child: SingleChildScrollView(
+        physics: NeverScrollableScrollPhysics(),
+        child: _buildContent(),
+      ),
+    );
+  }
+
+  Widget _buildExpandedContent() {
+    return _buildContent();
+  }
+
+  Widget _buildContent() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...widget.lesson['lesson_content'].map<Widget>((content) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10.0),
+              child: Text(content['paragraph']),
+            );
+          }).toList(),
+        ],
       ),
     );
   }

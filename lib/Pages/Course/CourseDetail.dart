@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'CourseContentPage.dart'; // Import the new page
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CourseDetailPage extends StatefulWidget {
   final String courseId;
@@ -15,8 +16,8 @@ class CourseDetailPage extends StatefulWidget {
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
   bool isLoading = true;
-  bool _isTapped = false;
   bool isPurchased = false;
+  bool _isTapped = false;
   String title = '';
   String description = '';
   String courseImage = '';
@@ -41,25 +42,63 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
             final course = data['course'];
             title = course['name'];
             description = course['short_description'];
-            courseImage = 'https://kamal-golang-back-b154d239f542.herokuapp.com' + course['image_url'];
+            courseImage = course['image_url'];
             cost = course['cost'];
             moduleCount = course['module_count'];
-            isLoading = false;
           });
         } else {
           // Handle error
-          setState(() {
-            isLoading = false;
-          });
         }
       } else {
         // Handle error
-        setState(() {
-          isLoading = false;
-        });
       }
     } catch (e) {
       // Handle error
+    }
+    // Fetch purchase status after fetching course details
+    checkIfPurchased();
+  }
+
+  Future<void> checkIfPurchased() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token == null) {
+      // Handle the case where the token is not available
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User token not found')),
+      );
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/user/get-courses';
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(utf8.decode(response.bodyBytes));
+        if (data['status'] == 'success') {
+          setState(() {
+            isPurchased = (data['course'] as List)
+                .any((course) => course['id'] == widget.courseId);
+          });
+        } else {
+          // Handle error
+        }
+      } else {
+        // Handle error
+      }
+    } catch (e) {
+      // Handle error
+    } finally {
       setState(() {
         isLoading = false;
       });
@@ -88,11 +127,6 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       );
 
       if (response.statusCode <299) {
-        // Save the purchased course ID locally
-        List<String> purchasedCourses = prefs.getStringList('purchasedCourses') ?? [];
-        purchasedCourses.add(widget.courseId);
-        await prefs.setStringList('purchasedCourses', purchasedCourses);
-
         // Handle successful purchase
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Course purchased successfully')),
@@ -115,15 +149,6 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     }
   }
 
-  Future<void> checkIfPurchased() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String> purchasedCourses = prefs.getStringList('purchasedCourses') ?? [];
-
-    setState(() {
-      isPurchased = purchasedCourses.contains(widget.courseId);
-    });
-  }
-
   void startCourse() {
     Navigator.push(
       context,
@@ -137,27 +162,31 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Container(
-        height: 50,
-        margin: const EdgeInsets.all(10),
-        child: ElevatedButton(
-          style: ButtonStyle(
-            shape: MaterialStateProperty.all(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(13),
+      floatingActionButton: isLoading
+          ? null
+          : SingleChildScrollView(
+            child: Container(
+                    height: 50,
+                    margin: const EdgeInsets.all(10),
+                    child: ElevatedButton(
+            style: ButtonStyle(
+              shape: MaterialStateProperty.all(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(13),
+                ),
+              ),
+              backgroundColor: MaterialStateProperty.all<Color>(isPurchased ? Colors.green:Color(0xFF0085A1)),
+            ),
+            onPressed: isPurchased ? startCourse : buyCourse,
+            child: Center(
+              child: Text(
+                isPurchased ? 'Курсты бастау' : 'Курсты сатып алу',
+                style: const TextStyle(color: Colors.white),
               ),
             ),
-            backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF0085A1)),
+                    ),
+                  ),
           ),
-          onPressed: isPurchased ? startCourse : buyCourse,
-          child: Center(
-            child: Text(
-              isPurchased ? 'Курсты бастау' : 'Курсты сатып алу',
-              style: const TextStyle(color: Colors.white),
-            ),
-          ),
-        ),
-      ),
       appBar: AppBar(
         actions: [
           Padding(
@@ -210,27 +239,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
                   child: courseImage.isNotEmpty
-                      ? Image.network(
-                    courseImage,
+                      ? SvgPicture.asset(
+                    courseImage.substring(1),
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        'assets/images/placeholder.png', // Path to your placeholder image
-                        fit: BoxFit.cover,
-                      );
-                    },
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) {
-                        return child;
-                      }
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
-                              : null,
-                        ),
-                      );
-                    },
                   )
                       : Image.asset(
                     'assets/images/placeholder.png', // Path to your placeholder image

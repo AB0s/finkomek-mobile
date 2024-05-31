@@ -37,8 +37,8 @@ class _CalculatorsPageState extends State<CalculatorsPage> {
   final List<int> colorCodes = [0xFF0085A1, 0xFF00343F, 0xFFFFCA03, 0xFF0085A1];
 
   final List<String> CourseImages= <String>[
-    'assets/1Course.svg',
-    'assets/2Course.svg',
+    'assets/course_card1.svg',
+    'assets/course_card2.svg',
     'assets/3Course.svg',
     'assets/1Course.svg',
   ];

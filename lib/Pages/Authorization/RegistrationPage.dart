@@ -76,7 +76,7 @@ class RegisterPage extends StatelessWidget {
                       uppercaseCharCount: 1,
                       numericCharCount: 2,
                       width: 400,
-                      height: 100,
+                      height: 120,
                       onSuccess: () {
 
                       },

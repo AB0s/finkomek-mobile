@@ -57,7 +57,7 @@ class _RowOfScreensState extends State<RowOfScreens> {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                          ChatPage()));
+                          CalculatorsPage()));
                 },
               ),
               Column(

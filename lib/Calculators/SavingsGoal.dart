@@ -9,6 +9,10 @@ class SavingsGoalCalculatorPage extends StatefulWidget {
 }
 
 class _SavingsGoalCalculatorPageState extends State<SavingsGoalCalculatorPage> {
+  TextEditingController _sumController = TextEditingController();
+  TextEditingController _currentSavingsController = TextEditingController();
+  TextEditingController _monthlySavingsControler = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,6 +42,7 @@ class _SavingsGoalCalculatorPageState extends State<SavingsGoalCalculatorPage> {
                 height: 5,
               ),
               TextField(
+                controller: _sumController,
                 decoration: InputDecoration(
                   isDense: true,
                   constraints: BoxConstraints.tight(const Size.fromHeight(40)),
@@ -57,6 +62,7 @@ class _SavingsGoalCalculatorPageState extends State<SavingsGoalCalculatorPage> {
                 height: 5,
               ),
               TextField(
+                controller: _currentSavingsController,
                 decoration: InputDecoration(
                   isDense: true,
                   constraints: BoxConstraints.tight(const Size.fromHeight(40)),
@@ -76,44 +82,7 @@ class _SavingsGoalCalculatorPageState extends State<SavingsGoalCalculatorPage> {
                 height: 5,
               ),
               TextField(
-                decoration: InputDecoration(
-                  isDense: true,
-                  constraints: BoxConstraints.tight(const Size.fromHeight(40)),
-                  border:
-                      OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                  hintText: 'Мөлшерін еңгізіңіз',
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              const Text(
-                'Күтілетін табыс нормасы',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              TextField(
-                decoration: InputDecoration(
-                  isDense: true,
-                  constraints: BoxConstraints.tight(const Size.fromHeight(40)),
-                  border:
-                      OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                  hintText: 'Мөлшерін еңгізіңіз',
-                ),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              const Text(
-                'Жинақ табысының басқа көздері',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(
-                height: 5,
-              ),
-              TextField(
+                controller: _monthlySavingsControler,
                 decoration: InputDecoration(
                   isDense: true,
                   constraints: BoxConstraints.tight(const Size.fromHeight(40)),
@@ -130,7 +99,7 @@ class _SavingsGoalCalculatorPageState extends State<SavingsGoalCalculatorPage> {
                 child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF00343F)),
-                    onPressed: () {},
+                    onPressed: () {calculateSavingsGoal();},
                     child: const Text(
                       'Есептеу',
                       style: TextStyle(color: Colors.white),
@@ -141,5 +110,43 @@ class _SavingsGoalCalculatorPageState extends State<SavingsGoalCalculatorPage> {
         ),
       ),
     );
+  }
+  void calculateSavingsGoal() {
+
+    double sumSavings = double.tryParse(
+        _sumController.text.replaceAll(',', '')) ??
+        0.0;
+
+    double currentSavings = double.tryParse(
+        _currentSavingsController.text.replaceAll(',', '')) ??
+        0.0;
+    double monthlySavings = double.tryParse(
+        _monthlySavingsControler.text.replaceAll(',', '')) ??
+        0.0;
+
+    double futureTime =
+    (sumSavings-currentSavings)/monthlySavings;
+    print(futureTime);
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return SingleChildScrollView(
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.35,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    title: const Text('Айлар саны'),
+                    trailing: Text(
+                      '${futureTime.toStringAsFixed(2)}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
   }
 }
