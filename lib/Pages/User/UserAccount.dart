@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'UserSettings.dart';
 import '../Authorization/LoginPage.dart';
-import '../../Widgets/UserAccountTabbar.dart';
+import '../../Widgets/User/UserAccountTabbar.dart';
 
 class UserAccountPage extends StatefulWidget {
   const UserAccountPage({Key? key}) : super(key: key);

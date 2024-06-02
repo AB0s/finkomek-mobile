@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:llf/Widgets/ExpertCard.dart';
-import 'package:llf/Widgets/SmallExpertCard.dart';
+import 'package:llf/Widgets/Expert/ExpertCard.dart';
+import 'package:llf/Widgets/Expert/SmallExpertCard.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 class ExpertsPage extends StatefulWidget {

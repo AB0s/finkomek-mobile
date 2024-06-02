@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../Widgets/CustomBanner.dart';
-import '../HomePage.dart';
+import '../../Widgets/Base/CustomBanner.dart';
+import '../MainPage.dart';
 import 'RegistrationPage.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -78,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => HomePage(showLoginSuccess: true)),
+              builder: (context) => const MainPage()),
         );
       } else {
         setState(() {

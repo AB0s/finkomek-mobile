@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'ConsultationWidget.dart';
-import 'CoursesTabView.dart';
+import '../Consultation/ConsultationWidget.dart';
+import '../Course/CoursesTabView.dart';
 
 class UserAccountTabbar extends StatefulWidget {
   const UserAccountTabbar({Key? key}) : super(key: key);
@@ -21,6 +21,7 @@ class _UserAccountTabbarState extends State<UserAccountTabbar> {
               (BuildContext context, bool boxIsScrolled) {
             return [
               SliverAppBar(
+                scrolledUnderElevation:0,
                 pinned: true,
                 toolbarHeight: 40,
                 automaticallyImplyLeading: false,

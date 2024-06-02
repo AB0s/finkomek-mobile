@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../Provider/ChatProvider.dart';
+import '../../Provider/ChatProvider.dart';
 
 class ChatPage extends StatelessWidget {
   @override

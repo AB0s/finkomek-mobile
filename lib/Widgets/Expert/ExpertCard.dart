@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../Pages/Expert/ExpertDetail.page.dart';
+import '../../Pages/Expert/ExpertDetail.page.dart';
 
 class ExpertCard extends StatefulWidget {
   const ExpertCard({Key? key}) : super(key: key);

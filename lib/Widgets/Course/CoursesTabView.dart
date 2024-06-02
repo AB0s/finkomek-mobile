@@ -3,8 +3,9 @@ import 'package:http/http.dart' as http;
 import 'package:llf/Pages/Course/CourseContentPage.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-import '../Pages/Course/CourseDetail.dart';
+import '../../Pages/Course/CourseDetail.dart';
 
 class CoursesTabView extends StatefulWidget {
   const CoursesTabView({Key? key}) : super(key: key);
@@ -88,6 +89,7 @@ class _CoursesTabViewState extends State<CoursesTabView> {
           itemCount: userCourses.length,
           itemBuilder: (context, index) {
             var course = userCourses[index];
+            print(course['image_url']);
             return Padding(
               padding: const EdgeInsets.only(top: 20, right: 10, left: 10),
               child: Container(
@@ -110,19 +112,11 @@ class _CoursesTabViewState extends State<CoursesTabView> {
                           child: ClipRRect(
                             borderRadius: const BorderRadius.only(
                                 bottomRight: Radius.circular(16)),
-                            child: Image.network(
-                              'https://kamal-golang-back-b154d239f542.herokuapp.com' + course['image_url'],
+                            child: SvgPicture.asset(
+                              course['image_url'].substring(1),
                               height: MediaQuery.of(context).size.height * 0.10,
                               width: MediaQuery.of(context).size.width * 0.2,
                               fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset(
-                                  'assets/CreditCard.png',
-                                  height: MediaQuery.of(context).size.height * 0.10,
-                                  width: MediaQuery.of(context).size.width * 0.2,
-                                  fit: BoxFit.cover,
-                                );
-                              },
                             ),
                           ),
                         ),

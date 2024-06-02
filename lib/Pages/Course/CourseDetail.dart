@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -32,7 +33,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   }
 
   Future<void> fetchCourseDetails() async {
-    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/course/${widget.courseId}';
+    final url =
+        'https://kamal-golang-back-b154d239f542.herokuapp.com/course/${widget.courseId}';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -74,7 +76,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       return;
     }
 
-    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/user/get-courses';
+    final url =
+        'https://kamal-golang-back-b154d239f542.herokuapp.com/user/get-courses';
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -117,7 +120,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       return;
     }
 
-    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/user/buy-course/${widget.courseId}';
+    final url =
+        'https://kamal-golang-back-b154d239f542.herokuapp.com/user/buy-course/${widget.courseId}';
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -126,7 +130,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
         },
       );
 
-      if (response.statusCode <299) {
+      if (response.statusCode < 299) {
         // Handle successful purchase
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Course purchased successfully')),
@@ -161,112 +165,80 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: isLoading
-          ? null
-          : SingleChildScrollView(
-            child: Container(
-                    height: 50,
-                    margin: const EdgeInsets.all(10),
-                    child: ElevatedButton(
-            style: ButtonStyle(
-              shape: MaterialStateProperty.all(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(13),
-                ),
-              ),
-              backgroundColor: MaterialStateProperty.all<Color>(isPurchased ? Colors.green:Color(0xFF0085A1)),
-            ),
-            onPressed: isPurchased ? startCourse : buyCourse,
-            child: Center(
-              child: Text(
-                isPurchased ? 'Курсты бастау' : 'Курсты сатып алу',
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-                    ),
-                  ),
-          ),
-      appBar: AppBar(
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 15),
-            child: IconButton(
-              icon: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (Widget child, Animation<double> animation) {
-                  return ScaleTransition(child: child, scale: animation);
-                },
-                child: Icon(
-                  Icons.favorite,
-                  key: ValueKey<bool>(_isTapped),
-                  color: _isTapped ? Colors.red : Colors.black,
-                  size: 30.0,
-                ),
-              ),
-              onPressed: () {
-                setState(() {
-                  _isTapped = !_isTapped;
-                });
-              },
-            ),
-          )
-        ],
-      ),
+      appBar: AppBar(),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  color: const Color(0xFF0085A1),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.5),
-                      spreadRadius: 4,
-                      blurRadius: 6,
-                      offset: const Offset(0, 3), // changes position of shadow
-                    ),
-                  ],
-                ),
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height * 0.28,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: courseImage.isNotEmpty
-                      ? SvgPicture.asset(
-                    courseImage.substring(1),
-                    fit: BoxFit.cover,
-                  )
-                      : Image.asset(
-                    'assets/images/placeholder.png', // Path to your placeholder image
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ),
-            Padding(
               padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.05,
-                  vertical: MediaQuery.of(context).size.height * 0.015),
+                  horizontal: MediaQuery.of(context).size.width * 0.05),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                children: <Widget>[
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: courseImage.isNotEmpty
+                          ? Image.asset(
+                        courseImage.substring(1, courseImage.length - 3) + "png",
+                              fit: BoxFit.cover,
+                            )
+                          : Image.asset(
+                              'assets/images/placeholder.png',
+                              // Path to your placeholder image
+                              fit: BoxFit.cover,
+                            ),
+                    ),
+                  ),
+                  SizedBox(height: 20,),
                   Text(
                     title,
                     style: const TextStyle(
-                        color: Color(0xFF0085A1),
+                        color: Colors.black,
                         fontWeight: FontWeight.bold,
-                        fontSize: 24),
+                        fontSize: 20),
                   ),
                   const SizedBox(
                     height: 20,
                   ),
+                  const Text('бағасы 2990 тг',style: TextStyle(color: Color(0xFF018733),fontWeight: FontWeight.bold,fontSize: 16),),
+                  SizedBox(height: 20,),
+                  const Row(
+                    children: [
+                      Icon(
+                        Icons.star_outlined,
+                        color: Colors.yellow,
+                        size: 26,
+                      ),
+                      Text(
+                        '4.5',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black),
+                      )
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  ElevatedButton(
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                      backgroundColor: MaterialStateProperty.all<Color>(isPurchased ? Colors.green:Color(0xFF0085A1)),
+                    ),
+                    onPressed: isPurchased ? startCourse : buyCourse,
+                    child: Center(
+                      child: Text(
+                        isPurchased ? 'Курсты бастау' : 'Курсты сатып алу',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20,),
                   Text(
                     description,
                     style: const TextStyle(fontSize: 16),
@@ -274,38 +246,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                   const SizedBox(
                     height: 30,
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: Color(0xFF0085A1),
-                        borderRadius: BorderRadius.circular(16)),
-                    child: const FittedBox(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.star,
-                              color: Colors.yellow,
-                              size: 32,
-                            ),
-                            Text(
-                              '4.5',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 22,
-                                  color: Colors.white),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  )
                 ],
               ),
-            )
-          ],
-        ),
-      ),
+            ),
     );
   }
 }

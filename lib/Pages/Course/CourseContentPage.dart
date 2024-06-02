@@ -3,6 +3,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../Widgets/Course/VideoPlayerWidget.dart';
+
 class CourseContentPage extends StatefulWidget {
   final String courseId;
 
@@ -15,6 +17,8 @@ class CourseContentPage extends StatefulWidget {
 class _CourseContentPageState extends State<CourseContentPage> {
   bool isLoading = true;
   Map<String, dynamic> courseContent = {};
+  int currentModuleIndex = 0;
+  int currentLessonIndex = 0;
 
   @override
   void initState() {
@@ -34,7 +38,8 @@ class _CourseContentPageState extends State<CourseContentPage> {
       return;
     }
 
-    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/user/${widget.courseId}';
+    final url =
+        'https://kamal-golang-back-b154d239f542.herokuapp.com/user/${widget.courseId}';
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -70,161 +75,166 @@ class _CourseContentPageState extends State<CourseContentPage> {
     }
   }
 
+  void goToPreviousLesson() {
+    setState(() {
+      if (currentLessonIndex > 0) {
+        currentLessonIndex--;
+      } else if (currentModuleIndex > 0) {
+        currentModuleIndex--;
+        currentLessonIndex =
+            courseContent['modules'][currentModuleIndex]['lessons'].length - 1;
+      }
+    });
+  }
+
+  void goToNextLesson() {
+    setState(() {
+      if (currentLessonIndex <
+          courseContent['modules'][currentModuleIndex]['lessons'].length - 1) {
+        currentLessonIndex++;
+      } else if (currentModuleIndex < courseContent['modules'].length - 1) {
+        currentModuleIndex++;
+        currentLessonIndex = 0;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+        appBar: AppBar(),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    bool isLastLesson = currentModuleIndex ==
+            courseContent['modules'].length - 1 &&
+        currentLessonIndex ==
+            courseContent['modules'][currentModuleIndex]['lessons'].length - 1;
+
+    var currentModule = courseContent['modules'][currentModuleIndex];
+    var currentLesson = currentModule['lessons'][currentLessonIndex];
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(courseContent['name'] ?? 'Course Content'),
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : DefaultTabController(
-        length: courseContent['modules']?.length ?? 0,
-        child: Column(
-          children: [
-            TabBar(
-              isScrollable: true,
-              tabs: [
-                for (var module in courseContent['modules'])
-                  Tab(text: module['module_name']),
-              ],
-            ),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  for (var i = 0; i < courseContent['modules'].length; i++)
-                    ListView.builder(
-                      itemCount: courseContent['modules'][i]['lessons'].length + 1,
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              'Модуль ${i + 1}',
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          );
-                        }
-                        var lesson = courseContent['modules'][i]['lessons'][index - 1];
-                        return LessonCard(
-                          lesson: lesson,
-                          lessonIndex: index,
-                        );
-                      },
-                    ),
-                ],
-              ),
-            ),
-          ],
+        title: Text('${currentModuleIndex + 1} Бөлім: ${currentModule['module_name']}',style: TextStyle(fontSize: 20,fontWeight: FontWeight.bold),),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
       ),
-    );
-  }
-}
-
-class LessonCard extends StatefulWidget {
-  final Map<String, dynamic> lesson;
-  final int lessonIndex;
-
-  const LessonCard({Key? key, required this.lesson, required this.lessonIndex})
-      : super(key: key);
-
-  @override
-  _LessonCardState createState() => _LessonCardState();
-}
-
-class _LessonCardState extends State<LessonCard> {
-  bool isExpanded = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Card(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Урок ${widget.lessonIndex}: ${widget.lesson['lesson_name']}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            if (widget.lesson['lesson_type'] == 'vid' &&
-                widget.lesson['video_path'].isNotEmpty)
-              Container(
-                height: 200,
-                color: Colors.black,
-                child: Center(
-                  child: Text(
-                    'Video: ${widget.lesson['video_path']}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
+            if (!isLastLesson) ...[
+              Center(
+                child: Text(
+                  '${currentLessonIndex + 1}. ${currentLesson['lesson_name']}',
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-            if (widget.lesson['lesson_type'] == 'article')
-              AnimatedCrossFade(
-                firstChild: _buildCollapsedContent(),
-                secondChild: _buildExpandedContent(),
-                crossFadeState: isExpanded
-                    ? CrossFadeState.showSecond
-                    : CrossFadeState.showFirst,
-                duration: const Duration(milliseconds: 300),
-              ),
-            if (widget.lesson['lesson_type'] == 'article')
-              Align(
-                alignment: Alignment.centerRight,
-                child: IconButton(
-                  icon: Icon(isExpanded ? Icons.expand_less : Icons.expand_more),
-                  onPressed: () {
-                    setState(() {
-                      isExpanded = !isExpanded;
-                    });
-                  },
+              const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: currentLesson['lesson_type'] == 'article'? Text(
+                        currentLesson['lesson_content']
+                            .map((content) => content['paragraph'])
+                            .join('\n\n'),
+                    style: const TextStyle(fontSize: 16),):VideoPlayerWidget(videoPath: currentLesson['video_path'],)
                 ),
               ),
+            ] else ...[
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset('assets/student-achievement.png',
+                          height: 200),
+                      // Make sure to add this asset to your project
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Құттықтаймыз!',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text(
+                        'Сіз курсты аяқтадыңыз',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: currentLessonIndex == 0 && currentModuleIndex == 0
+                      ? null
+                      : goToPreviousLesson,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFFE7F4F8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.arrow_back,
+                          color:
+                              currentLessonIndex == 0 && currentModuleIndex == 0
+                                  ? Colors.grey
+                                  : const Color(0xFF0E7C9F)),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Алдыңғы тарау',
+                        style: TextStyle(
+                            color: currentLessonIndex == 0 &&
+                                    currentModuleIndex == 0
+                                ? Colors.grey
+                                : const Color(0xFF0E7C9F)),
+                      ),
+                    ],
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: isLastLesson
+                      ? () => Navigator.pop(context)
+                      : goToNextLesson,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFF0E7C9F),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(isLastLesson ? 'Басты бетке өту' : 'Келесі тарау'),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildCollapsedContent() {
-    return Container(
-      constraints: const BoxConstraints(maxHeight: 100.0), // Set a maximum height for collapsed content
-      child: SingleChildScrollView(
-        physics: NeverScrollableScrollPhysics(),
-        child: _buildContent(),
-      ),
-    );
-  }
-
-  Widget _buildExpandedContent() {
-    return _buildContent();
-  }
-
-  Widget _buildContent() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ...widget.lesson['lesson_content'].map<Widget>((content) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 10.0),
-              child: Text(content['paragraph']),
-            );
-          }).toList(),
-        ],
       ),
     );
   }

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'Pages/Authorization/LoginPage.dart';
-import 'Pages/HomePage.dart';
+import 'Pages/MainPage.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +14,7 @@ class MyApp extends StatelessWidget {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? token = prefs.getString('token');
     if (token != null) {
-      return HomePage();
+      return const MainPage();
     } else {
       return LoginScreen();
     }
@@ -34,7 +33,7 @@ class MyApp extends StatelessWidget {
         future: _getInitialScreen(),
         builder: (BuildContext context, AsyncSnapshot<Widget> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Scaffold(
+            return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
             );
           } else {
