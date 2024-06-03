@@ -64,23 +64,26 @@ class _CoursesPageState extends State<CoursesPage> {
       appBar: AppBar(),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          :SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width * 0.05),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Финтех Курстарымен танысыңыз',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            const SizedBox(
-              height: 10,
-            ),
-            const Text(
-              'Оқу жолыңызды таңдаңыз, дағдыларыңызды дамытыңыз және біліміңізді шыңдаңыз. Барлығы бір жерде.',
-              style: TextStyle(fontSize: 14),
-            ),
-            const SizedBox(height: 10,),
-            ListView.separated(
+          : SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.05),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('Финтех Курстарымен танысыңыз',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  const Text(
+                    'Оқу жолыңызды таңдаңыз, дағдыларыңызды дамытыңыз және біліміңізді шыңдаңыз. Барлығы бір жерде.',
+                    style: TextStyle(fontSize: 14),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  ListView.separated(
                     physics: const NeverScrollableScrollPhysics(),
                     primary: false,
                     shrinkWrap: true,
@@ -108,9 +111,9 @@ class _CoursesPageState extends State<CoursesPage> {
                         const Padding(
                             padding: EdgeInsets.symmetric(vertical: 5)),
                   ),
-          ],
-        ),
-      ),
+                ],
+              ),
+            ),
     );
   }
 }

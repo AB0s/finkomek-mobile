@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:llf/Pages/User/UserAccount.dart';
 import '../Widgets/Base/BottomNavBar.dart';
 import 'Course/CoursesPage.dart';
+import 'Expert/ExpertsPage.dart';
 import 'Home/HomePage.dart';
 
 class MainPage extends StatefulWidget {
@@ -31,8 +32,8 @@ class _MainPageState extends State<MainPage> {
     return <Widget>[
       HomePage(),
       CoursesPage(),
+      ExpertsPage(),
       UserAccountPage(),
-      PlaceholderWidget(Colors.blue),
     ];
   }
 
