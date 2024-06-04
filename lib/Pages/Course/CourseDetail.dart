@@ -1,10 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'CourseContentPage.dart'; // Import the new page
-import 'package:flutter_svg/flutter_svg.dart';
+import 'ChechOutPage.dart';
+import 'CourseContentPage.dart';
 
 class CourseDetailPage extends StatefulWidget {
   final String courseId;
@@ -24,6 +23,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   String courseImage = '';
   int cost = 0;
   String moduleCount = '';
+  double rating = 4.5; // Assuming a static rating, you can adjust it accordingly
+  String courseType = 'Бейне-материал'; // Assuming a static course type
 
   @override
   void initState() {
@@ -33,8 +34,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   }
 
   Future<void> fetchCourseDetails() async {
-    final url =
-        'https://kamal-golang-back-b154d239f542.herokuapp.com/course/${widget.courseId}';
+    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/course/${widget.courseId}';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -76,8 +76,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       return;
     }
 
-    final url =
-        'https://kamal-golang-back-b154d239f542.herokuapp.com/user/get-courses';
+    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/user/get-courses';
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -108,6 +107,15 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     }
   }
 
+  void startCourse() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CourseContentPage(courseId: widget.courseId),
+      ),
+    );
+  }
+
   Future<void> buyCourse() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
@@ -120,8 +128,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
       return;
     }
 
-    final url =
-        'https://kamal-golang-back-b154d239f542.herokuapp.com/user/buy-course/${widget.courseId}';
+    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/user/buy-course/${widget.courseId}';
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -153,102 +160,118 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     }
   }
 
-  void startCourse() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CourseContentPage(courseId: widget.courseId),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: const Text('Course Details'),
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.05),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: courseImage.isNotEmpty
-                          ? Image.asset(
-                        courseImage.substring(1, courseImage.length - 3) + "png",
-                              fit: BoxFit.cover,
-                            )
-                          : Image.asset(
-                              'assets/images/placeholder.png',
-                              // Path to your placeholder image
-                              fit: BoxFit.cover,
-                            ),
-                    ),
-                  ),
-                  SizedBox(height: 20,),
-                  Text(
-                    title,
-                    style: const TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20),
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  const Text('бағасы 2990 тг',style: TextStyle(color: Color(0xFF018733),fontWeight: FontWeight.bold,fontSize: 16),),
-                  SizedBox(height: 20,),
-                  const Row(
-                    children: [
-                      Icon(
-                        Icons.star_outlined,
-                        color: Colors.yellow,
-                        size: 26,
-                      ),
-                      Text(
-                        '4.5',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Colors.black),
-                      )
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  ElevatedButton(
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                      ),
-                      backgroundColor: MaterialStateProperty.all<Color>(isPurchased ? Colors.green:Color(0xFF0085A1)),
-                    ),
-                    onPressed: isPurchased ? startCourse : buyCourse,
-                    child: Center(
-                      child: Text(
-                        isPurchased ? 'Курсты бастау' : 'Курсты сатып алу',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20,),
-                  Text(
-                    description,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                ],
+        padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.05),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: courseImage.isNotEmpty
+                    ? Image.asset(
+                  courseImage.substring(1, courseImage.length - 3) + "png",
+                  fit: BoxFit.cover,
+                )
+                    : Image.asset(
+                  'assets/images/placeholder.png',
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
+            const SizedBox(height: 20),
+            Text(
+              title,
+              style: const TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 20),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'бағасы ${cost} тг',
+              style: const TextStyle(
+                  color: Color(0xFF018733),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Icon(
+                  Icons.star_outlined,
+                  color: Colors.yellow,
+                  size: 26,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  rating.toString(),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                backgroundColor: MaterialStateProperty.all<Color>(
+                    isPurchased ? Colors.green : Color(0xFF0085A1)),
+              ),
+              onPressed: () {
+                if (isPurchased) {
+                  startCourse();
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CheckoutPage(
+                        courseId: widget.courseId,
+                        courseName: title,
+                        coursePrice: cost.toDouble(),
+                        courseRating: rating,
+                        courseType: courseType,
+                        onCoursePurchased: () {
+                          setState(() {
+                            isPurchased = true;
+                          });
+                        },
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: Center(
+                child: Text(
+                  isPurchased ? 'Курсты бастау' : 'Курсты сатып алу',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              description,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 30),
+          ],
+        ),
+      ),
     );
   }
 }
