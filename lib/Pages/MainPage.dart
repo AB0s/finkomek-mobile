@@ -5,6 +5,7 @@ import '../Widgets/Base/BottomNavBar.dart';
 import 'Course/CoursesPage.dart';
 import 'Expert/ExpertsPage.dart';
 import 'Home/HomePage.dart';
+import 'SchedulePage.dart';
 
 class MainPage extends StatefulWidget {
 
@@ -33,7 +34,7 @@ class _MainPageState extends State<MainPage> {
       HomePage(),
       CoursesPage(),
       ExpertsPage(),
-      UserAccountPage(),
+      SchedulePage(),
     ];
   }
 

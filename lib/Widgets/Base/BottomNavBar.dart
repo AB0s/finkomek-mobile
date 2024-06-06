@@ -38,8 +38,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
           label: 'Эксперттер',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.more_horiz_outlined),
-          label: 'Тағы басқа',
+          icon: Icon(Icons.calendar_month),
+          label: 'Кесте',
         ),
       ],
       currentIndex: widget.currentIndex,

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../Consultation/ConsultationWidget.dart';
@@ -66,7 +67,7 @@ class _UserAccountTabbarState extends State<UserAccountTabbar> {
           },
           body: const TabBarView(
             children: <Widget>[
-              ConsultaionWidget(),
+              Text('1'),
               CoursesTabView(),
               Text('2'),
             ],

@@ -1,92 +1,127 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
-import '../../Provider/ChatProvider.dart';
+class ChatPage extends StatefulWidget {
+  final String roomId;
+  final String userName;
+  final String expertName;
 
-class ChatPage extends StatelessWidget {
+  const ChatPage({
+    Key? key,
+    required this.roomId,
+    required this.userName,
+    required this.expertName,
+  }) : super(key: key);
+
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ChatProvider()..connect(),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text('Chat'),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.exit_to_app),
-              onPressed: () {
-                Provider.of<ChatProvider>(context, listen: false).disconnect();
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
-        body: Consumer<ChatProvider>(
-          builder: (context, provider, child) {
-            return Column(
-              children: <Widget>[
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: provider.messages.length,
-                    itemBuilder: (context, index) {
-                      final message = provider.messages[index];
-                      return ListTile(
-                        title: Text(message['username']!),
-                        subtitle: Text(message['message']!),
-                      );
-                    },
-                  ),
-                ),
-                if (!provider.isConnected)
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      'Disconnected. Trying to reconnect...',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                _MessageInputField(),
-              ],
-            );
-          },
-        ),
-      ),
+  _ChatPageState createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  late WebSocketChannel channel;
+  final TextEditingController _controller = TextEditingController();
+  List<Map<String, String>> messages = [];
+  Timer? _reconnectTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _connect();
+  }
+
+  void _connect() {
+    channel = WebSocketChannel.connect(
+      Uri.parse('wss://kamal-golang-back-b154d239f542.herokuapp.com/chat/ws/61fe1852-9c80-42cc-9f62-135938a7a1e2'),
+    );
+
+    channel.stream.listen(
+          (data) {
+        final messageData = Map<String, String>.from(json.decode(data));
+        setState(() {
+          messages.add(messageData);
+        });
+      },
+      onError: (error) {
+        print('WebSocket error: $error');
+        _scheduleReconnect();
+      },
+      onDone: () {
+        print('WebSocket closed');
+        _scheduleReconnect();
+      },
     );
   }
-}
 
-class _MessageInputField extends StatefulWidget {
-  @override
-  __MessageInputFieldState createState() => __MessageInputFieldState();
-}
-
-class __MessageInputFieldState extends State<_MessageInputField> {
-  final TextEditingController _controller = TextEditingController();
+  void _scheduleReconnect() {
+    if (_reconnectTimer == null || !_reconnectTimer!.isActive) {
+      _reconnectTimer = Timer(Duration(seconds: 5), () {
+        print('Attempting to reconnect...');
+        _connect();
+      });
+    }
+  }
 
   void _sendMessage() {
     if (_controller.text.isNotEmpty) {
-      Provider.of<ChatProvider>(context, listen: false).sendMessage(_controller.text);
+      final message = {
+        'username': widget.userName,
+        'message': _controller.text,
+      };
+      channel.sink.add(json.encode(message));
       _controller.clear();
     }
   }
 
   @override
+  void dispose() {
+    channel.sink.close();
+    _reconnectTimer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              decoration: InputDecoration(hintText: 'Enter your message'),
+    print(widget.roomId);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Чат с ${widget.expertName}'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  final message = messages[index];
+                  return ListTile(
+                    title: Text(message['username']!),
+                    subtitle: Text(message['message']!),
+                  );
+                },
+              ),
             ),
-          ),
-          IconButton(
-            icon: Icon(Icons.send),
-            onPressed: _sendMessage,
-          ),
-        ],
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      hintText: 'Жазу...',
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.send),
+                  onPressed: _sendMessage,
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

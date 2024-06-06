@@ -4,10 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../Widgets/Consultation/ConsultationWidget.dart';
 import '../../Widgets/Course/CourseCard.dart';
 import '../../Widgets/Course/SmallCourseCard.dart';
+import '../User/UserAccount.dart';
 
 class HomePage extends StatefulWidget {
-
-  const HomePage( {Key? key}) : super(key: key);
+  const HomePage({Key? key}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -32,7 +32,47 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            SizedBox(
+              height: 50,
+            ),
+            ListTile(
+              title: Text(
+                'FINKOMEK',
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontSize: 24,
+                ),
+              ),
+            ),
+            ListTile(
+              title: Text('Аккаунт'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => UserAccountPage()));
+              },
+            ),
+            ListTile(
+              title: Text('Тіл ауыстыру'),
+              onTap: () {
+                // Handle language change
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
       body: SingleChildScrollView(
         physics: const ScrollPhysics(),
         padding: EdgeInsets.symmetric(
@@ -82,21 +122,10 @@ class _HomePageState extends State<HomePage> {
               'Алдағы онлайн-кездесулер',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            const SizedBox(height: 10,),
-            ListView.separated(
-              primary: false,
-              shrinkWrap: true,
-              itemCount: 3,
-              physics: const NeverScrollableScrollPhysics(),
-              itemBuilder: (BuildContext context, int index) {
-                return ConsultaionWidget();
-              },
-              separatorBuilder: (BuildContext context, int index) {
-                return const SizedBox(
-                  height: 20,
-                );
-              },
+            const SizedBox(
+              height: 10,
             ),
+            ConsultationWidget(),
             const SizedBox(
               height: 20,
             ),
@@ -104,18 +133,24 @@ class _HomePageState extends State<HomePage> {
               'Соңғы өткен курстар',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            const SizedBox(height: 20,),
+            const SizedBox(
+              height: 20,
+            ),
             const CourseCard(
-              title: 'Балаларға арнағалан қаржылық сауаттылық курсы',
+              title: 'Балаларға арналған қаржылық сауаттылық курсы',
               description: '',
               courseImage: '/assets/course_card1.png',
             ),
-            const SizedBox(height: 20,),
+            const SizedBox(
+              height: 20,
+            ),
             const Text(
               'Жуардағы курстар',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            const SizedBox(height: 20,),
+            const SizedBox(
+              height: 20,
+            ),
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.3,
               child: ListView.separated(

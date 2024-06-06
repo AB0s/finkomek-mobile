@@ -1,273 +1,206 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:date_picker_timeline/date_picker_timeline.dart';
-import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+import 'MeetingTimeSelector.dart';
+import 'CheckoutPage.dart';
 
 class ExpertDetailPage extends StatefulWidget {
-  const ExpertDetailPage({Key? key}) : super(key: key);
+  final int expertId;
+
+  const ExpertDetailPage({Key? key, required this.expertId}) : super(key: key);
 
   @override
-  State<ExpertDetailPage> createState() => _ExpertDetailPageState();
+  _ExpertDetailPageState createState() => _ExpertDetailPageState();
 }
 
 class _ExpertDetailPageState extends State<ExpertDetailPage> {
-  final Map<String, String> russianTranslations = {
-    'January': 'Январь',
-    'February': 'Февраль',
-    'March': 'Март',
-    'April': 'Апрель',
-    'May': 'Май',
-    'June': 'Июнь',
-    'July': 'Июль',
-    'August': 'Август',
-    'September': 'Сентябрь',
-    'October': 'Октябрь',
-    'November': 'Ноябрь',
-    'December': 'Декабрь',
-    'Mon': 'Пн',
-    'Tue': 'Вт',
-    'Wed': 'Ср',
-    'Thu': 'Чт',
-    'Fri': 'Пт',
-    'Sat': 'Сб',
-    'Sun': 'Вс',
-  };
+  bool isLoading = true;
+  bool isMeetingLoading = true;
+  Map<String, dynamic> expert = {};
+  List<dynamic> availableMeetings = [];
+  List<String> availableDates = [];
+  String selectedDate = '';
+  int selectedTimeId = -1;
 
-  final Map<DateTime, List<String>> appointmentTimes = {
-    DateTime(2024, 5, 20): ['10:00-11:00', '12:00-13:00', '15:00-16:00'],
-    DateTime(2024, 5, 21): ['09:00-10:00', '11:00-12:00', '14:00-15:00'],
-    DateTime(2024, 5, 22): ['08:00-09:00', '13:00-14:00', '16:00-17:00'],
-  };
+  @override
+  void initState() {
+    super.initState();
+    fetchExpertDetails();
+    fetchAvailableMeetings();
+  }
 
-  DateTime selectedDate = DateTime.now();
-  List<String> selectedAppointments = [];
+  Future<void> fetchExpertDetails() async {
+    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/expert/${widget.expertId}';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(utf8.decode(response.bodyBytes));
+        if (data['status'] == 'success') {
+          if (mounted) {
+            setState(() {
+              expert = data['expert'];
+              isLoading = false;
+            });
+          }
+        } else {
+          if (mounted) {
+            setState(() {
+              isLoading = false;
+            });
+          }
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
 
-  void onDateChange(DateTime date) {
+  Future<void> fetchAvailableMeetings() async {
+    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/expert/meets/${widget.expertId}';
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = json.decode(utf8.decode(response.bodyBytes));
+        if (data['status'] == 'success') {
+          if (mounted) {
+            setState(() {
+              availableMeetings = data['expert'];
+              availableDates = availableMeetings
+                  .map<String>((meeting) => meeting['timeStart'].substring(0, 10))
+                  .toSet()
+                  .toList();
+              isMeetingLoading = false;
+            });
+          }
+        } else {
+          if (mounted) {
+            setState(() {
+              isMeetingLoading = false;
+            });
+          }
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            isMeetingLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isMeetingLoading = false;
+        });
+      }
+    }
+  }
+
+  void onDateSelected(String date) {
     setState(() {
       selectedDate = date;
-      selectedAppointments = appointmentTimes[date] ?? [];
     });
   }
 
-  void showAppointmentDetails(BuildContext context, String appointmentTime) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Container(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Подробности приёма',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Дата: ${formatDateToRussian(selectedDate)}',
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Время: $appointmentTime',
-                style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 30),
-              Container(
-                width: MediaQuery.of(context).size.width,
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                      const Color(0xFF0085A1),
-                    ),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                          )
-                      )
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                    // Handle appointment making logic here
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                          content:
-                              Text('Встреча назначена на $appointmentTime')),
-                    );
-                  },
-                  child: const Text(
-                    'Назначить встречу',
-                    style: TextStyle(
-                        color: Colors.white, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  String formatDateToRussian(DateTime date) {
-    final dayOfWeek = russianTranslations[DateFormat('E').format(date)] ?? '';
-    final month = russianTranslations[DateFormat('MMMM').format(date)] ?? '';
-    final day = date.day.toString();
-    return '$dayOfWeek, $day $month';
+  void onTimeSelected(int timeId) {
+    setState(() {
+      selectedTimeId = timeId;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.3,
-                    child: const Text(
-                      'Name Surname',
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-                    ),
-                  ),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(20),
-                    child: Image.asset(
-                      height: MediaQuery.of(context).size.height * 0.2,
-                      width: MediaQuery.of(context).size.width * 0.45,
-                      'assets/ExpertsPage/1ExpertsPage.png',
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                ],
+      appBar: AppBar(
+        title: const Text('Эксперттің мәліметтері'),
+      ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: expert['imageLink'] != null
+                    ? Image.network(
+                  expert['imageLink'],
+                  height: MediaQuery.of(context).size.height * 0.3,
+                  fit: BoxFit.cover,
+                )
+                    : Image.asset(
+                  'assets/images/placeholder.png',
+                  height: MediaQuery.of(context).size.height * 0.3,
+                  fit: BoxFit.cover,
+                ),
               ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                    decoration: BoxDecoration(
-                        color: Color(0xFF0085A1),
-                        borderRadius: BorderRadius.circular(16)),
-                    child: Text(
-                      'Байланыска шыгу',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                        color: Color(0xFF0085A1),
-                        borderRadius: BorderRadius.circular(16)),
-                    child: const FittedBox(
-                      child: Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.star,
-                              color: Colors.yellow,
-                              size: 26,
-                            ),
-                            Text(
-                              '4.5',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Colors.white),
-                            ),
-                          ],
-                        ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              '${expert['firstName']} ${expert['lastName']}',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              expert['email'],
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              '${expert['cost']} тг/сағ',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              expert['description'],
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            MeetingTimeSelector(
+              availableDates: availableDates,
+              availableMeetings: availableMeetings,
+              onDateSelected: onDateSelected,
+              onTimeSelected: onTimeSelected,
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: selectedDate.isNotEmpty && selectedTimeId != -1
+                    ? () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CheckoutPage(
+                        expert: expert,
+                        meetingTimeId: selectedTimeId,
+                        roomId: availableMeetings.firstWhere((meeting) => meeting['Id'] == selectedTimeId)['roomId'],
+                        meetingTime: availableMeetings.firstWhere((meeting) => meeting['Id'] == selectedTimeId),
+                        onBookingSuccess: fetchAvailableMeetings,
                       ),
                     ),
-                  ),
-                ],
+                  );
+                }
+                    : null,
+                child: const Text('Жалғастыру'),
               ),
-              const SizedBox(height: 20),
-              Column(
-                children: [
-                  Text(
-                    formatDateToRussian(selectedDate),
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  DatePicker(
-                    DateTime.now(),
-                    width: 80,
-                    height: 100,
-                    initialSelectedDate: selectedDate,
-                    selectionColor: Color(0xFF0085A1),
-
-                    dateTextStyle: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    dayTextStyle: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    monthTextStyle: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    onDateChange: onDateChange,
-                    locale: 'ru',
-                  ),
-                  const SizedBox(height: 30),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                      childAspectRatio: 3,
-                    ),
-                    itemCount: selectedAppointments.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () => showAppointmentDetails(
-                            context, selectedAppointments[index]),
-                        child: Container(
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Color(0xFF0085A1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: Text(
-                            selectedAppointments[index],
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
