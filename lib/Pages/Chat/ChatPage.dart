@@ -1,7 +1,8 @@
-import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'VideoChatPage.dart';
 
 class ChatPage extends StatefulWidget {
   final String roomId;
@@ -33,7 +34,7 @@ class _ChatPageState extends State<ChatPage> {
 
   void _connect() {
     channel = WebSocketChannel.connect(
-      Uri.parse('wss://kamal-golang-back-b154d239f542.herokuapp.com/chat/ws/61fe1852-9c80-42cc-9f62-135938a7a1e2'),
+      Uri.parse('wss://kamal-golang-back-b154d239f542.herokuapp.com/chat/ws/${widget.roomId}'),
     );
 
     channel.stream.listen(
@@ -81,12 +82,26 @@ class _ChatPageState extends State<ChatPage> {
     _controller.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
-    print(widget.roomId);
     return Scaffold(
       appBar: AppBar(
         title: Text('Чат с ${widget.expertName}'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.video_call),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => VideoChatPage(
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

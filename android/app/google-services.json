@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "493648790490",
+    "project_id": "diplomawork-7de70",
+    "storage_bucket": "diplomawork-7de70.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:493648790490:android:f03ff7ab09e29a3fc936e3",
+        "android_client_info": {
+          "package_name": "com.example.llf"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBymVi6S-9ns77HrC3AI4AlPMRFMGjLVEo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

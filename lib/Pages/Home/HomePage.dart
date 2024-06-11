@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:llf/Pages/Chat/VideoChatPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Widgets/Consultation/ConsultationWidget.dart';
 import '../../Widgets/Course/CourseCard.dart';
@@ -65,9 +66,9 @@ class _HomePageState extends State<HomePage> {
             ),
             ListTile(
               title: Text('Тіл ауыстыру'),
-              onTap: () {
-                // Handle language change
+              onTap: () {//61fe1852-9c80-42cc-9f62-135938a7a1e2
                 Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (context) => VideoChatPage()));
               },
             ),
           ],
@@ -94,21 +95,27 @@ class _HomePageState extends State<HomePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Қош келдің, $_fname',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                    Container(
+                      width: MediaQuery.of(context).size.width*0.35,
+                      child: Text(
+                        'Қош келдің, $_fname',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                     const SizedBox(
                       height: 5,
                     ),
-                    const Text(
-                      'Бүгін не жаңалық?',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                    Container(
+                      width: MediaQuery.of(context).size.width*0.35,
+                      child: const Text(
+                        'Бүгін не жаңалық?',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                   ],

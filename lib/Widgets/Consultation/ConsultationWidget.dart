@@ -109,7 +109,6 @@ class _ConsultationWidgetState extends State<ConsultationWidget> {
       primary: false,
       shrinkWrap: true,
       itemCount: consultations.length,
-      physics: const NeverScrollableScrollPhysics(),
       itemBuilder: (BuildContext context, int index) {
         var consultation = consultations[index];
         String roomId = consultation['roomId'];
@@ -145,24 +144,28 @@ class _ConsultationWidgetState extends State<ConsultationWidget> {
                           SizedBox(height: 5),
                           Text('Күнделікті финанстық консултация'),
                           SizedBox(height: 5),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Icon(Icons.calendar_month),
-                                  SizedBox(width: 5),
-                                  Text(formatDate(consultation['timeStart'])),
-                                ],
-                              ),
-                              Row(
-                                children: [
-                                  Icon(Icons.watch_later_outlined),
-                                  SizedBox(width: 5),
-                                  Text(formatTime(consultation['timeStart'], consultation['timeEnd'])),
-                                ],
-                              ),
-                            ],
+                          Container(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.calendar_month),
+                                    SizedBox(width: 5),
+                                    Text(formatDate(consultation['timeStart'])),
+                                  ],
+                                ),
+                                Container(
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.watch_later_outlined),
+                                      SizedBox(width: 5),
+                                      Text(formatTime(consultation['timeStart'], consultation['timeEnd'])),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
