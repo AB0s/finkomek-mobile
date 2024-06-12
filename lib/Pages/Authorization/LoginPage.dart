@@ -21,34 +21,12 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
   String _errorMessage = '';
+  late bool _passwordVisible;
 
   @override
   void initState() {
+    _passwordVisible = false;
     super.initState();
-    if (widget.showBanner) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showLoginSuccessBanner();
-      });
-    }
-  }
-
-  void _showLoginSuccessBanner() {
-    OverlayState? overlayState = Overlay.of(context);
-    OverlayEntry overlayEntry = OverlayEntry(
-      builder: (context) => const Positioned(
-        top: kToolbarHeight + 20,
-        left: 0,
-        right: 0,
-        child: SuccessBanner(
-            message: 'Вы зарегистрированы,теперь \n войдите в свой аккаунт'),
-      ),
-    );
-
-    overlayState?.insert(overlayEntry);
-
-    Future.delayed(Duration(seconds: 3), () {
-      overlayEntry.remove();
-    });
   }
 
   Future<void> _login() async {
@@ -77,18 +55,19 @@ class _LoginScreenState extends State<LoginScreen> {
         await prefs.setString('lname', responseBody['lname']);
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-              builder: (context) => const MainPage()),
+          MaterialPageRoute(builder: (context) => const MainPage()),
         );
       } else {
         setState(() {
           _errorMessage = responseBody['message'];
         });
       }
-    } else {
-      setState(() {
-        _errorMessage = 'Failed to login';
-      });
+    }
+    if (response.statusCode == 400) {
+      final Map<String, dynamic> responseBody = jsonDecode(response.body);
+      if (responseBody['message'] == 'incorrect email or password') {
+        _errorMessage = 'Қате пошта немесе құпия сөз';
+      }
     }
 
     setState(() {
@@ -99,33 +78,94 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login')),
+      appBar: AppBar(title: const Text('Кіру')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            const Text(
+              'КІРУ',
+              style: TextStyle(
+                  color: Color(0xFF0085A1),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 34),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
             TextField(
               controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: InputDecoration(
+                  label: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.email_outlined),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      Text('Электрондық пошта')
+                    ],
+                  ),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14))),
             ),
-            TextField(
+            const SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              keyboardType: TextInputType.text,
               controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
+              obscureText: !_passwordVisible,
+              //This will obscure text dynamically
+              decoration: InputDecoration(
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                label: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.lock_outline),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text('Құпия сөз')
+                  ],
+                ),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    // Based on passwordVisible state choose the icon
+                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: Colors.black54,
+                  ),
+                  onPressed: () {
+                    // Update the state i.e. toogle the state of passwordVisible variable
+                    setState(() {
+                      _passwordVisible = !_passwordVisible;
+                    });
+                  },
+                ),
+              ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _isLoading
-                ? CircularProgressIndicator()
+                ? const CircularProgressIndicator()
                 : ElevatedButton(
                     onPressed: _login,
-                    child: Text('Login'),
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      foregroundColor: Colors.white,
+                      backgroundColor: const Color(0xFF0E7C9F),
+                    ),
+                    child: const Text('Кіру'),
                   ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Text(
               _errorMessage,
-              style: TextStyle(color: Colors.red),
+              style: const TextStyle(color: Colors.red),
             ),
-            SizedBox(height: 20),
             TextButton(
               onPressed: () {
                 Navigator.pushReplacement(
@@ -133,8 +173,27 @@ class _LoginScreenState extends State<LoginScreen> {
                   MaterialPageRoute(builder: (context) => RegisterPage()),
                 );
               },
-              child: Text('Don\'t have an account? Register'),
+              child: RichText(
+                text: const TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "Аккаунтыңыз жоқ па? ",
+                      style:
+                          TextStyle(color: Colors.black), // default text color
+                    ),
+                    TextSpan(
+                      text: 'Тіркеліңіз',
+                      style: TextStyle(
+                          color: Color(
+                              0xFF0085A1)), // color of the word you want to change
+                    ),
+                  ],
+                ),
+              ),
             ),
+            SizedBox(
+              height: 50,
+            )
           ],
         ),
       ),

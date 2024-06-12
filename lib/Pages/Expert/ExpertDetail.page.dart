@@ -31,7 +31,8 @@ class _ExpertDetailPageState extends State<ExpertDetailPage> {
   }
 
   Future<void> fetchExpertDetails() async {
-    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/expert/${widget.expertId}';
+    final url =
+        'https://kamal-golang-back-b154d239f542.herokuapp.com/expert/${widget.expertId}';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -67,7 +68,8 @@ class _ExpertDetailPageState extends State<ExpertDetailPage> {
   }
 
   Future<void> fetchAvailableMeetings() async {
-    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/expert/meets/${widget.expertId}';
+    final url =
+        'https://kamal-golang-back-b154d239f542.herokuapp.com/expert/meets/${widget.expertId}';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -77,7 +79,8 @@ class _ExpertDetailPageState extends State<ExpertDetailPage> {
             setState(() {
               availableMeetings = data['expert'];
               availableDates = availableMeetings
-                  .map<String>((meeting) => meeting['timeStart'].substring(0, 10))
+                  .map<String>(
+                      (meeting) => meeting['timeStart'].substring(0, 10))
                   .toSet()
                   .toList();
               isMeetingLoading = false;
@@ -127,80 +130,93 @@ class _ExpertDetailPageState extends State<ExpertDetailPage> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.05),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: expert['imageLink'] != null
-                    ? Image.network(
-                  expert['imageLink'],
-                  height: MediaQuery.of(context).size.height * 0.3,
-                  fit: BoxFit.cover,
-                )
-                    : Image.asset(
-                  'assets/images/placeholder.png',
-                  height: MediaQuery.of(context).size.height * 0.3,
-                  fit: BoxFit.cover,
-                ),
+              padding: EdgeInsets.symmetric(
+                  horizontal: MediaQuery.of(context).size.width * 0.05),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: expert['imageLink'] != null
+                          ? Image.network(
+                              expert['imageLink'],
+                              height: MediaQuery.of(context).size.height * 0.3,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.asset(
+                              'assets/images/placeholder.png',
+                              height: MediaQuery.of(context).size.height * 0.3,
+                              fit: BoxFit.cover,
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    '${expert['firstName']} ${expert['lastName']}',
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    expert['email'],
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${expert['cost']} тг/сағ',
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    expert['description'],
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(height: 16),
+                  MeetingTimeSelector(
+                    availableDates: availableDates,
+                    availableMeetings: availableMeetings,
+                    onDateSelected: onDateSelected,
+                    onTimeSelected: onTimeSelected,
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
             ),
-            const SizedBox(height: 20),
-            Text(
-              '${expert['firstName']} ${expert['lastName']}',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              expert['email'],
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              '${expert['cost']} тг/сағ',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              expert['description'],
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            MeetingTimeSelector(
-              availableDates: availableDates,
-              availableMeetings: availableMeetings,
-              onDateSelected: onDateSelected,
-              onTimeSelected: onTimeSelected,
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: selectedDate.isNotEmpty && selectedTimeId != -1
-                    ? () {
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(bottom: 20, left: 20,right: 20),
+        child: ElevatedButton(
+          onPressed: selectedDate.isNotEmpty && selectedTimeId != -1
+              ? () {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (context) => CheckoutPage(
                         expert: expert,
                         meetingTimeId: selectedTimeId,
-                        roomId: availableMeetings.firstWhere((meeting) => meeting['Id'] == selectedTimeId)['roomId'],
-                        meetingTime: availableMeetings.firstWhere((meeting) => meeting['Id'] == selectedTimeId),
+                        roomId: availableMeetings.firstWhere((meeting) =>
+                            meeting['Id'] == selectedTimeId)['roomId'],
+                        meetingTime: availableMeetings.firstWhere(
+                            (meeting) => meeting['Id'] == selectedTimeId),
                         onBookingSuccess: fetchAvailableMeetings,
                       ),
                     ),
                   );
                 }
-                    : null,
-                child: const Text('Жалғастыру'),
-              ),
+              : null,
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
-          ],
+            foregroundColor: Colors.white,
+            backgroundColor: const Color(0xFF0E7C9F),
+          ),
+          child: const Text('Жалғастыру'),
         ),
       ),
     );
   }
 }
-

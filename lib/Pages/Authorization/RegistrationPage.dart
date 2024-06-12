@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../Provider/RegistrationProvider.dart';
@@ -20,16 +21,27 @@ class RuStrings implements FlutterPwValidatorStrings {
   final String specialCharacters = "- Особых знаков";
 }
 
+class RegisterPage extends StatefulWidget {
+  @override
+  State<RegisterPage> createState() => _RegisterPageState();
+}
 
+class _RegisterPageState extends State<RegisterPage> {
+  late bool _passwordVisible;
 
-class RegisterPage extends StatelessWidget {
+  @override
+  void initState() {
+    _passwordVisible = false;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) => RegistrationProvider(),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Register'),
+          title: const Text('Тіркелу'),
         ),
         body: SingleChildScrollView(
           child: Padding(
@@ -38,38 +50,85 @@ class RegisterPage extends StatelessWidget {
               builder: (context, provider, child) {
                 return Column(
                   children: <Widget>[
+                    const Text(
+                      'ТІРКЕЛУ',
+                      style: TextStyle(
+                          color: Color(0xFF0085A1),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 34),
+                    ),
+                    SizedBox(height: 15,),
                     TextField(
                       controller: provider.emailController,
-                      decoration: const InputDecoration(labelText: 'Email'),
+                      decoration: InputDecoration(
+                          labelText: 'Электрондық пошта',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14))),
+                    ),
+                    const SizedBox(
+                      height: 10,
                     ),
                     Row(
                       children: [
                         Expanded(
                           child: TextField(
                             controller: provider.codeController,
-                            decoration: const InputDecoration(
-                                labelText: 'Verification Code'),
+                            decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(14)),
+                                labelText: 'Растау коды'),
                           ),
+                        ),
+                        const SizedBox(
+                          width: 10,
                         ),
                         ElevatedButton(
                           onPressed: provider.sendVerificationCode,
-                          child: const Text('Send Code'),
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            foregroundColor: Colors.white,
+                            backgroundColor: const Color(0xFF0E7C9F),
+                          ),
+                          child: const Text('Код жіберу'),
                         ),
                       ],
                     ),
                     Text(
                       provider.codeMessage,
                       style: TextStyle(
-                          color: provider.codeMessage.contains('Failed')
+                          color: provider.codeMessage.contains('Сәтсіз')
                               ? Colors.red
                               : Colors.green),
                     ),
-                    TextField(
+                    TextFormField(
                       controller: provider.passwordController,
-                      decoration: const InputDecoration(labelText: 'Password'),
-                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: 'Құпия сөз',
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14)),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            // Based on passwordVisible state choose the icon
+                            _passwordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: Colors.black54,
+                          ),
+                          onPressed: () {
+                            // Update the state i.e. toogle the state of passwordVisible variable
+                            setState(() {
+                              _passwordVisible = !_passwordVisible;
+                            });
+                          },
+                        ),
+                      ),
+                      obscureText: !_passwordVisible,
                     ),
-                    SizedBox(height: 10,),
+                    const SizedBox(
+                      height: 10,
+                    ),
                     FlutterPwValidator(
                       controller: provider.passwordController,
                       minLength: 8,
@@ -77,22 +136,29 @@ class RegisterPage extends StatelessWidget {
                       numericCharCount: 2,
                       width: 400,
                       height: 120,
-                      onSuccess: () {
-
-                      },
-                      onFail: () {
-
-                      },
+                      onSuccess: () {},
+                      onFail: () {},
                       strings: RuStrings(),
+                    ),
+                    const SizedBox(
+                      height: 15,
                     ),
                     TextField(
                       controller: provider.fnameController,
-                      decoration:
-                          const InputDecoration(labelText: 'First Name'),
+                      decoration: InputDecoration(
+                          labelText: 'Аты',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14))),
+                    ),
+                    const SizedBox(
+                      height: 10,
                     ),
                     TextField(
                       controller: provider.lnameController,
-                      decoration: const InputDecoration(labelText: 'Last Name'),
+                      decoration: InputDecoration(
+                          labelText: 'Тегі',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(14))),
                     ),
                     const SizedBox(height: 20),
                     provider.isLoading
@@ -103,19 +169,32 @@ class RegisterPage extends StatelessWidget {
                                 onPressed: provider.isCodeSent
                                     ? () => provider.registerWithCode(context)
                                     : null,
-                                child: Text('Register with Code'),
+                                child: const Text('Кодпен тіркелу'),
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: const Color(0xFF0E7C9F),
+                                ),
                               ),
                               ElevatedButton(
                                 onPressed: () =>
                                     provider.registerWithoutCode(context),
-                                child: Text('Register without Code'),
+                                child: const Text('Кодсыз тіркелу'),
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: const Color(0xFF0E7C9F),
+                                ),
                               ),
                             ],
                           ),
-                    const SizedBox(height: 20),
                     Text(
                       provider.errorMessage,
-                      style: TextStyle(color: Colors.red),
+                      style: const TextStyle(color: Colors.red),
                     ),
                     const SizedBox(height: 20),
                     TextButton(
@@ -126,7 +205,23 @@ class RegisterPage extends StatelessWidget {
                               builder: (context) => LoginScreen()),
                         );
                       },
-                      child: const Text('Have an account? Log in'),
+                      child: RichText(
+                        text: const TextSpan(
+                          children: [
+                            TextSpan(
+                              text: 'Аккаунтыныз бар ма? ',
+                              style: TextStyle(
+                                  color: Colors.black), // default text color
+                            ),
+                            TextSpan(
+                              text: 'Кіру',
+                              style: TextStyle(
+                                  color: Color(
+                                      0xFF0085A1)), // color of the word you want to change
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
                 );
