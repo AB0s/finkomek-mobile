@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:llf/Calculators/DebtPayOff.dart';
-import 'package:llf/Calculators/RetirementSavings.dart';
-import 'package:llf/Calculators/SavingsGoal.dart';
+import 'package:Finkomek/Calculators/DebtPayOff.dart';
+import 'package:Finkomek/Calculators/RetirementSavings.dart';
+import 'package:Finkomek/Calculators/SavingsGoal.dart';
 
 import '../../Calculators/NetWorth.dart';
 

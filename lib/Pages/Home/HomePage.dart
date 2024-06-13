@@ -1,8 +1,11 @@
+import 'package:Finkomek/Calculators/DebtPayOff.dart';
+import 'package:Finkomek/Calculators/RetirementSavings.dart';
+import 'package:Finkomek/Calculators/SavingsGoal.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:llf/Pages/Chat/VideoChatPage.dart';
+import 'package:Finkomek/Pages/Chat/VideoChatPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../Widgets/Consultation/ConsultationWidget.dart';
 import '../../Widgets/Course/CourseCard.dart';
@@ -35,6 +38,7 @@ class _HomePageState extends State<HomePage> {
       _lname = prefs.getString('lname') ?? '';
     });
   }
+
   Future<void> _logout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
@@ -43,7 +47,7 @@ class _HomePageState extends State<HomePage> {
     await prefs.remove('lname');
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => LoginScreen()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
           (Route<dynamic> route) => false,
     );
   }
@@ -54,7 +58,7 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         leading: Builder(
           builder: (context) => IconButton(
-            icon: Icon(Icons.menu),
+            icon: const Icon(Icons.menu),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
@@ -76,49 +80,54 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             ListTile(
-              title: Row(
-                children: [
-                  const Icon(Icons.account_circle_outlined),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Text('$_fname $_lname',),
-                  Expanded(child: SizedBox(),),
-                  ElevatedButton(
-                    onPressed: _logout,
-                    style: ButtonStyle(
-                      shape: MaterialStateProperty.all(
-                        RoundedRectangleBorder(
-                          // Change your radius here
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          const Color(0xFF0085A1)),
-                    ),
-                    child: const Text(
-                      'Logout',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
+              leading: const Icon(Icons.account_circle_outlined),
+              title: Text(
+                '$_fname $_lname',
               ),
             ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width*0.2),
+              child: ElevatedButton(
+                onPressed: _logout,
+                style: ButtonStyle(
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  backgroundColor: MaterialStateProperty.all<Color>(
+                    const Color(0xFF0085A1),
+                  ),
+                ),
+                child: const Text(
+                  'Logout',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+            const Divider(height: 30,),
             ListTile(
-              title: Text('Аккаунт'),
+              leading: const Icon(Icons.calculate),
+              title: const Text('Қарызды өтеу калькуляторы'),
               onTap: () {
-                Navigator.pop(context);
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => UserAccountPage()));
+                    MaterialPageRoute(builder: (context) => const DebtPayOffCalculatorPage()));
               },
             ),
             ListTile(
-              title: Text('Тіл ауыстыру'),
+              leading: const Icon(Icons.calculate),
+              title: const Text('Зейнетақы жинақ калькуляторы'),
               onTap: () {
-                //61fe1852-9c80-42cc-9f62-135938a7a1e2
-                Navigator.pop(context);
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => VideoChatPage()));
+                    MaterialPageRoute(builder: (context) => const RetirementSavingsCalculatorPage()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.calculate),
+              title: const Text('Жинақ мақсаттарының калькуляторы'),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => const SavingsGoalCalculatorPage()));
               },
             ),
           ],
@@ -136,104 +145,63 @@ class _HomePageState extends State<HomePage> {
               children: [
                 SvgPicture.asset(
                   'assets/HomePage/education-load.svg',
+                  width: MediaQuery.of(context).size.width * 0.45,
                   height: MediaQuery.of(context).size.height * 0.15,
                 ),
-                const SizedBox(
-                  width: 30,
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.35,
-                      child: Text(
+                const SizedBox(width: 30),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
                         'Қош келдің, $_fname',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Container(
-                      width: MediaQuery.of(context).size.width * 0.35,
-                      child: const Text(
+                      const SizedBox(height: 5),
+                      const Text(
                         'Бүгін не жаңалық?',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
-            const SizedBox(
-              height: 24,
-            ),
+            const SizedBox(height: 24),
             const Text(
               'Алдағы онлайн-кездесулер',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            const SizedBox(
-              height: 10,
-            ),
+            const SizedBox(height: 10),
             ConsultationWidget(),
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             const Text(
-              'Соңғы өткен курстар',
+              'Топтағы курс',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             GestureDetector(
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        CourseDetailPage(courseId: '6655e9252215a242c78740a0'),
+                    const CourseDetailPage(courseId: '6655e9252215a242c78740a0'),
                   ),
                 );
               },
               child: const CourseCard(
+                id: '6655e9252215a242c78740a0',
                 title: 'Балаларға арналған қаржылық сауаттылық курсы',
                 description: '',
                 courseImage: '/assets/course_card1.png',
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            const Text(
-              'Жуардағы курстар',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * 0.3,
-              child: ListView.separated(
-                physics: ClampingScrollPhysics(),
-                scrollDirection: Axis.horizontal,
-                shrinkWrap: true,
-                itemCount: 3,
-                itemBuilder: (BuildContext context, int index) {
-                  return SmallCourseCard();
-                },
-                separatorBuilder: (BuildContext context, int index) {
-                  return const SizedBox(
-                    width: 20,
-                  );
-                },
               ),
             ),
           ],

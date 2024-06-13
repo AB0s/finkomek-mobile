@@ -36,8 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     final response = await http.post(
-      Uri.parse(
-          'https://kamal-golang-back-b154d239f542.herokuapp.com/auth/login'),
+      Uri.parse('https://kamal-golang-back-b154d239f542.herokuapp.com/auth/login'),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
         'email': _emailController.text,
@@ -51,8 +50,8 @@ class _LoginScreenState extends State<LoginScreen> {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', responseBody['token']);
         await prefs.setString('email', responseBody['email']);
-        await prefs.setString('fname', responseBody['fname']);
-        await prefs.setString('lname', responseBody['lname']);
+        await prefs.setString('fname', utf8.decode(responseBody['fname'].codeUnits));
+        await prefs.setString('lname', utf8.decode(responseBody['lname'].codeUnits));
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MainPage()),
@@ -62,12 +61,17 @@ class _LoginScreenState extends State<LoginScreen> {
           _errorMessage = responseBody['message'];
         });
       }
-    }
-    if (response.statusCode == 400) {
+    } else if (response.statusCode == 400) {
       final Map<String, dynamic> responseBody = jsonDecode(response.body);
       if (responseBody['message'] == 'incorrect email or password') {
         _errorMessage = 'Қате пошта немесе құпия сөз';
+      } else {
+        _errorMessage = responseBody['message'];
       }
+    } else {
+      setState(() {
+        _errorMessage = 'Қате орын алды. Қайта көріңіз.';
+      });
     }
 
     setState(() {
@@ -118,10 +122,9 @@ class _LoginScreenState extends State<LoginScreen> {
               keyboardType: TextInputType.text,
               controller: _passwordController,
               obscureText: !_passwordVisible,
-              //This will obscure text dynamically
+              // This will obscure text dynamically
               decoration: InputDecoration(
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 label: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -151,16 +154,16 @@ class _LoginScreenState extends State<LoginScreen> {
             _isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
-                    onPressed: _login,
-                    style: ElevatedButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      foregroundColor: Colors.white,
-                      backgroundColor: const Color(0xFF0E7C9F),
-                    ),
-                    child: const Text('Кіру'),
-                  ),
+              onPressed: _login,
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF0E7C9F),
+              ),
+              child: const Text('Кіру'),
+            ),
             const SizedBox(height: 20),
             Text(
               _errorMessage,
@@ -178,22 +181,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     TextSpan(
                       text: "Аккаунтыңыз жоқ па? ",
-                      style:
-                          TextStyle(color: Colors.black), // default text color
+                      style: TextStyle(color: Colors.black), // default text color
                     ),
                     TextSpan(
                       text: 'Тіркеліңіз',
-                      style: TextStyle(
-                          color: Color(
-                              0xFF0085A1)), // color of the word you want to change
+                      style: TextStyle(color: Color(0xFF0085A1)), // color of the word you want to change
                     ),
                   ],
                 ),
               ),
             ),
-            SizedBox(
-              height: 50,
-            )
+            const SizedBox(height: 50),
           ],
         ),
       ),

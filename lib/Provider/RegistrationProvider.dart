@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:llf/APIs/RegistrationApi.dart';
+import 'package:Finkomek/APIs/RegistrationApi.dart';
 
 import '../Pages/Authorization/LoginPage.dart';
 

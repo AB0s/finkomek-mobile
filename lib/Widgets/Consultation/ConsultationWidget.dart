@@ -28,11 +28,18 @@ class _ConsultationWidgetState extends State<ConsultationWidget> {
     fetchConsultations();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   Future<void> _loadUserDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      userName = prefs.getString('fname') ?? '';
-    });
+    if (mounted) {
+      setState(() {
+        userName = prefs.getString('fname') ?? '';
+      });
+    }
   }
 
   Future<void> fetchConsultations() async {
@@ -40,9 +47,11 @@ class _ConsultationWidgetState extends State<ConsultationWidget> {
     String? token = prefs.getString('token');
 
     if (token == null) {
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
       return;
     }
 
@@ -58,19 +67,25 @@ class _ConsultationWidgetState extends State<ConsultationWidget> {
 
       if (response.statusCode == 200) {
         final data = json.decode(utf8.decode(response.bodyBytes));
-        setState(() {
-          consultations = widget.showAll ? data : data.take(3).toList();
-          isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            consultations = widget.showAll ? data : data.take(3).toList();
+            isLoading = false;
+          });
+        }
       } else {
+        if (mounted) {
+          setState(() {
+            isLoading = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
         setState(() {
           isLoading = false;
         });
       }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
     }
   }
 
@@ -87,6 +102,39 @@ class _ConsultationWidgetState extends State<ConsultationWidget> {
       }
     } catch (e) {
       throw Exception('Failed to load expert details');
+    }
+  }
+
+  Future<void> deleteMeeting(String roomId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token == null) {
+      // Handle the case where token is null
+      return;
+    }
+
+    final url =
+        'https://kamal-golang-back-b154d239f542.herokuapp.com/user/meeting/delete-meeting/$roomId';
+    try {
+      final response = await http.delete(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode < 299) {
+        // Successfully deleted the meeting, now update the state
+        setState(() {
+          consultations.removeWhere((consultation) => consultation['roomId'] == roomId);
+        });
+      } else {
+        // Handle the error case
+        print('Failed to delete the meeting');
+      }
+    } catch (e) {
+      print('Error deleting the meeting: $e');
     }
   }
 
@@ -108,148 +156,150 @@ class _ConsultationWidgetState extends State<ConsultationWidget> {
     return isLoading
         ? Center(child: CircularProgressIndicator())
         : consultations.isEmpty
-            ? Center(child: Text('Әзірге кездесулер жоқ'))
-            : ListView.separated(
-                primary: false,
-                shrinkWrap: true,
-                itemCount: consultations.length,
-                itemBuilder: (BuildContext context, int index) {
-                  var consultation = consultations[index];
-                  String roomId = consultation['roomId'];
-                  String expertId = consultation['expertId'].toString();
+        ? Center(child: Text('Әзірге кездесулер жоқ'))
+        : ListView.separated(
+      primary: false,
+      shrinkWrap: true,
+      itemCount: consultations.length,
+      itemBuilder: (BuildContext context, int index) {
+        var consultation = consultations[index];
+        String roomId = consultation['roomId'];
+        String expertId = consultation['expertId'].toString();
 
-                  return FutureBuilder<Map<String, dynamic>>(
-                    future: fetchExpertDetails(expertId),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center();
-                      } else if (snapshot.hasError) {
-                        return const Center(
-                            child: Text('Error loading expert details'));
-                      } else {
-                        var expert = snapshot.data!;
-                        return Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                              border: Border.all(
-                                  color: Colors.black.withOpacity(0.1)),
-                              borderRadius: BorderRadius.circular(8)),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+        return FutureBuilder<Map<String, dynamic>>(
+          future: fetchExpertDetails(expertId),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center();
+            } else if (snapshot.hasError) {
+              return const Center(
+                  child: Text('Error loading expert details'));
+            } else {
+              var expert = snapshot.data!;
+              return Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                    border: Border.all(
+                        color: Colors.black.withOpacity(0.1)),
+                    borderRadius: BorderRadius.circular(8)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: consultationWidgetWidth * 0.6,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${expert['firstName']} ${expert['lastName']}',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 5),
+                          const Text(
+                              'Күнделікті финанстық консултация'),
+                          const SizedBox(height: 5),
+                          Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
                             children: [
-                              Container(
-                                width: consultationWidgetWidth * 0.6,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${expert['firstName']} ${expert['lastName']}',
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    const SizedBox(height: 5),
-                                    const Text(
-                                        'Күнделікті финанстық консултация'),
-                                    const SizedBox(height: 5),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            const Icon(Icons.calendar_month),
-                                            const SizedBox(width: 5),
-                                            SizedBox(
-                                                width:
-                                                    consultationWidgetWidth *
-                                                        0.2,
-                                                child: Text(formatDate(
-                                                    consultation[
-                                                        'timeStart']))),
-                                          ],
-                                        ),
-                                        Row(
-                                          children: [
-                                            const Icon(
-                                                Icons.watch_later_outlined),
-                                            const SizedBox(width: 5),
-                                            Container(
-                                              width: consultationWidgetWidth*0.23,
-                                              child: Text(formatTime(
-                                                  consultation['timeStart'],
-                                                  consultation['timeEnd'])),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Column(
+                              Row(
                                 children: [
+                                  const Icon(Icons.calendar_month),
+                                  const SizedBox(width: 5),
                                   SizedBox(
-                                    width: consultationWidgetWidth * 0.3,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => ChatPage(
-                                              roomId: roomId,
-                                              userName: userName,
-                                              expertName:
-                                                  '${expert['firstName']} ${expert['lastName']}',
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        foregroundColor:
-                                            const Color(0xFF0C6683),
-                                        backgroundColor:
-                                            const Color(0xFFE7F4F8),
-                                      ),
-                                      child: const Text('Чат'),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: consultationWidgetWidth * 0.3,
-                                    child: ElevatedButton(
-                                      onPressed: () {},
-                                      style: ElevatedButton.styleFrom(
-                                        padding: EdgeInsets.zero,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        foregroundColor:
-                                            const Color(0xFFAB2204),
-                                        backgroundColor:
-                                            const Color(0xFFFFE1DA),
-                                      ),
-                                      child: const Text('Бас тарту'),
-                                    ),
+                                      width:
+                                      consultationWidgetWidth *
+                                          0.2,
+                                      child: Text(formatDate(
+                                          consultation[
+                                          'timeStart']))),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  const Icon(
+                                      Icons.watch_later_outlined),
+                                  const SizedBox(width: 5),
+                                  Container(
+                                    width: consultationWidgetWidth*0.23,
+                                    child: Text(formatTime(
+                                        consultation['timeStart'],
+                                        consultation['timeEnd'])),
                                   ),
                                 ],
                               ),
                             ],
                           ),
-                        );
-                      }
-                    },
-                  );
-                },
-                separatorBuilder: (BuildContext context, int index) {
-                  return const SizedBox(
-                    height: 20,
-                  );
-                },
+                        ],
+                      ),
+                    ),
+                    Column(
+                      children: [
+                        SizedBox(
+                          width: consultationWidgetWidth * 0.3,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatPage(
+                                    roomId: roomId,
+                                    userName: userName,
+                                    expertName:
+                                    '${expert['firstName']} ${expert['lastName']}',
+                                  ),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius.circular(8),
+                              ),
+                              foregroundColor:
+                              const Color(0xFF0C6683),
+                              backgroundColor:
+                              const Color(0xFFE7F4F8),
+                            ),
+                            child: const Text('Чат'),
+                          ),
+                        ),
+                        SizedBox(
+                          width: consultationWidgetWidth * 0.3,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              deleteMeeting(roomId);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius.circular(8),
+                              ),
+                              foregroundColor:
+                              const Color(0xFFAB2204),
+                              backgroundColor:
+                              const Color(0xFFFFE1DA),
+                            ),
+                            child: const Text('Бас тарту'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               );
+            }
+          },
+        );
+      },
+      separatorBuilder: (BuildContext context, int index) {
+        return const SizedBox(
+          height: 20,
+        );
+      },
+    );
   }
 }

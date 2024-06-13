@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:agora_uikit/agora_uikit.dart';
 
 const String appId = "1e3ab4257f214ba3a0d88545a38a8895";
-const String token = "007eJxTYPBTuHLT6NlW1to45r9PVnxzMbydci7Co33FvJ27Vv3aOHGDAoNhqnFikomRqXmakaFJUqJxokGKhYWpiWmisUWihYWl6V+RjLSGQEYG8wvRLIwMEAjiszOkZBbk5OcmMjAAAGg2Irw=";
+const String token = "007eJxTYAj390qfLRfI+GPrtRPcOaeSrVjT6t9rmKtbmuyK8vNdkKjAYJhqnJhkYmRqnmZkaJKUaJxokGJhYWpimmhskWhhYWk64VFmWkMgI8PjyuOMjAwQCOKzM6RkFuTk5yYyMAAA4V8eoQ==";
 const String channel = "diploma";
 
 class VideoChatPage extends StatefulWidget {
@@ -24,17 +25,25 @@ class _VideoChatPageState extends State<VideoChatPage> {
     initAgora();
   }
 
+  final AgoraClient client = AgoraClient(
+    agoraConnectionData: AgoraConnectionData(
+      appId: appId,
+      channelName: channel,
+    ),
+  );
+
   Future<void> initAgora() async {
-    // retrieve permissions
+    // Retrieve permissions
     await [Permission.microphone, Permission.camera].request();
 
-    //create the engine
+    // Create the engine
     _engine = createAgoraRtcEngine();
-    await _engine.initialize(const RtcEngineContext(
-      appId: appId,
-      channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
-    ));
+    await _engine.initialize(const RtcEngineContext(appId: appId));
 
+    // Register event handlers
+    if (_engine == null) {
+      throw Exception('RTC Engine is not initialized');
+    }
     _engine.registerEventHandler(
       RtcEngineEventHandler(
         onJoinChannelSuccess: (RtcConnection connection, int elapsed) {
@@ -49,16 +58,14 @@ class _VideoChatPageState extends State<VideoChatPage> {
             _remoteUid = remoteUid;
           });
         },
-        onUserOffline: (RtcConnection connection, int remoteUid,
-            UserOfflineReasonType reason) {
+        onUserOffline: (RtcConnection connection, int remoteUid, UserOfflineReasonType reason) {
           debugPrint("remote user $remoteUid left channel");
           setState(() {
             _remoteUid = null;
           });
         },
         onTokenPrivilegeWillExpire: (RtcConnection connection, String token) {
-          debugPrint(
-              '[onTokenPrivilegeWillExpire] connection: ${connection.toJson()}, token: $token');
+          debugPrint('[onTokenPrivilegeWillExpire] connection: ${connection.toJson()}, token: $token');
         },
       ),
     );
@@ -67,18 +74,22 @@ class _VideoChatPageState extends State<VideoChatPage> {
     await _engine.enableVideo();
     await _engine.startPreview();
 
-    await _engine.joinChannel(
-      token: token,
-      channelId: channel,
-      uid: 0,
-      options: const ChannelMediaOptions(),
-    );
+    try {
+      await _engine.joinChannel(
+        token: token,
+        channelId: channel,
+        uid: 0,
+        options: const ChannelMediaOptions(),
+      );
+      await client.initialize();
+    } catch (e) {
+      debugPrint("Error joining Agora channel: $e");
+    }
   }
 
   @override
   void dispose() {
     super.dispose();
-
     _dispose();
   }
 
@@ -92,7 +103,7 @@ class _VideoChatPageState extends State<VideoChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agora Video Call'),
+        title: const Text('Кездесу'),
       ),
       body: Stack(
         children: [
@@ -116,6 +127,10 @@ class _VideoChatPageState extends State<VideoChatPage> {
               ),
             ),
           ),
+          AgoraVideoButtons(
+            client: client,
+            addScreenSharing: false, // Add this to enable screen sharing
+          ),
         ],
       ),
     );
@@ -133,7 +148,7 @@ class _VideoChatPageState extends State<VideoChatPage> {
       );
     } else {
       return const Text(
-        'Please wait for remote user to join',
+        'Басқа пайдаланушынын қосылуын күтіңіз',
         textAlign: TextAlign.center,
       );
     }

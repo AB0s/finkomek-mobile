@@ -31,7 +31,7 @@ class _RetirementSavingsCalculatorPageState
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               const Text(
-                'Retirement savings calculator',
+                'Зейнетақы жинақ калькуляторы',
                 style: TextStyle(
                     fontSize: 26,
                     color: Color(0xFF0085A1),
@@ -41,7 +41,7 @@ class _RetirementSavingsCalculatorPageState
                 height: 20,
               ),
               const Text(
-                'Current and retirement ages',
+                'Қазіргі және зейнеткерлік жас',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(
@@ -62,7 +62,7 @@ class _RetirementSavingsCalculatorPageState
                             borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(10),
                                 bottomLeft: Radius.circular(10))),
-                        hintText: 'Current age',
+                        hintText: 'Қазіргі жас',
                       ),
                     ),
                   ),
@@ -79,7 +79,7 @@ class _RetirementSavingsCalculatorPageState
                             borderRadius: BorderRadius.only(
                                 topRight: Radius.circular(10),
                                 bottomRight: Radius.circular(10))),
-                        hintText: 'Retirement age',
+                        hintText: 'Зейнеткерлік жас',
                       ),
                     ),
                   ),
@@ -89,7 +89,7 @@ class _RetirementSavingsCalculatorPageState
                 height: 10,
               ),
               const Text(
-                'Current pension savings',
+                'Ағымдағы зейнетақы жинақтары',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               SizedBox(
@@ -100,11 +100,12 @@ class _RetirementSavingsCalculatorPageState
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   isDense: true,
+                  prefix: const Text('₸ '),
                   constraints:
                   BoxConstraints.tight(const Size.fromHeight(40)),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10)),
-                  hintText: 'Enter the amount',
+                  hintText: 'Соманы енгізіңіз',
                 ),
                 inputFormatters: [
                   CurrencyInputFormatter(),
@@ -114,7 +115,7 @@ class _RetirementSavingsCalculatorPageState
                 height: 10,
               ),
               const Text(
-                'Monthly storage volume',
+                'Жалақыныз',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(
@@ -125,11 +126,12 @@ class _RetirementSavingsCalculatorPageState
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   isDense: true,
+                  prefix: const Text('₸ '),
                   constraints:
                   BoxConstraints.tight(const Size.fromHeight(40)),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10)),
-                  hintText: 'Enter the amount',
+                  hintText: 'Соманы енгізіңіз',
                 ),
                 inputFormatters: [
                   CurrencyInputFormatter(),
@@ -143,28 +145,10 @@ class _RetirementSavingsCalculatorPageState
                     backgroundColor: Color(0xFF00343F),
                   ),
                   onPressed: () {
-                    double result = calculateRetirementSavings();
-                    // Do something with the result, like displaying it in a dialog
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text('Retirement Savings'),
-                          content: Text('Your retirement savings will be ${result.toStringAsFixed(2)}'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
+                    calculateRetirementSavings();
                   },
                   child: const Text(
-                    'Calculate',
+                    'Есептеу',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),
@@ -176,7 +160,7 @@ class _RetirementSavingsCalculatorPageState
     );
   }
 
-  double calculateRetirementSavings() {
+  void calculateRetirementSavings() {
     double currentSavings = double.tryParse(
         _currentSavingsController.text.replaceAll(',', '')) ??
         0.0;
@@ -190,6 +174,26 @@ class _RetirementSavingsCalculatorPageState
     double futureValue =
         currentSavings + (yearsUntilRetirement*12)*(annualContribution*0.1);
 
-    return futureValue;
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext context) {
+          return SingleChildScrollView(
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.35,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    title: const Text('Болашақ сома'),
+                    trailing: Text(
+                      '${futureValue.toInt()}',
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
   }
 }

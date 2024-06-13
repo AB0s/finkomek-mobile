@@ -41,7 +41,17 @@ class SuccessPage extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.pop(context);
               },
-              child: const Text('Жеке паракшага оту'),
+              style: ButtonStyle(
+                shape: MaterialStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                backgroundColor: MaterialStateProperty.all<Color>(
+                  const Color(0xFF0085A1),
+                ),
+              ),
+              child: const Text('Курсқа өту',style: TextStyle(color: Colors.white),),
             ),
           ],
         ),

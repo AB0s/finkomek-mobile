@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:email_validator/email_validator.dart';
 import 'ExpertDetail.page.dart';
 
-class CheckoutPage extends StatelessWidget {
+class CheckoutPage extends StatefulWidget {
   final Map<String, dynamic> expert;
   final int meetingTimeId;
   final String roomId;
@@ -21,6 +22,28 @@ class CheckoutPage extends StatelessWidget {
     required this.onBookingSuccess,
   }) : super(key: key);
 
+  @override
+  _CheckoutPageState createState() => _CheckoutPageState();
+}
+
+class _CheckoutPageState extends State<CheckoutPage> {
+  final emailController = TextEditingController();
+  final cardNumberController = TextEditingController();
+  final expiryDateController = TextEditingController();
+  final cvvController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  String? emailError;
+  bool isEmailValid = false;
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    cardNumberController.dispose();
+    expiryDateController.dispose();
+    cvvController.dispose();
+    super.dispose();
+  }
+
   Future<void> bookConsultation(BuildContext context, String email) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? token = prefs.getString('token');
@@ -32,7 +55,8 @@ class CheckoutPage extends StatelessWidget {
       return;
     }
 
-    final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/user/meeting/make-appointment';
+    final url =
+        'https://kamal-golang-back-b154d239f542.herokuapp.com/user/meeting/make-appointment';
     try {
       final response = await http.post(
         Uri.parse(url),
@@ -41,7 +65,7 @@ class CheckoutPage extends StatelessWidget {
           'Content-Type': 'application/json',
         },
         body: jsonEncode({
-          'roomId': roomId,
+          'roomId': widget.roomId,
         }),
       );
 
@@ -59,11 +83,12 @@ class CheckoutPage extends StatelessWidget {
               ),
             ),
           );
-          onBookingSuccess();
+          widget.onBookingSuccess();
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => ExpertDetailPage(expertId: expert['Id']),
+              builder: (context) =>
+                  ExpertDetailPage(expertId: widget.expert['Id']),
             ),
           );
         } else {
@@ -99,18 +124,26 @@ class CheckoutPage extends StatelessWidget {
     }
   }
 
+  void _validateEmail(String value) {
+    setState(() {
+      if (EmailValidator.validate(value)) {
+        emailError = 'Жарамды пошта';
+        isEmailValid = true;
+      } else {
+        emailError = 'Жарамсыз пошта';
+        isEmailValid = false;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final emailController = TextEditingController();
-    final cardNumberController = TextEditingController();
-    final expiryDateController = TextEditingController();
-    final cvvController = TextEditingController();
-
-    DateTime startTime = DateTime.parse(meetingTime['timeStart']);
-    DateTime endTime = DateTime.parse(meetingTime['timeEnd']);
+    DateTime startTime = DateTime.parse(widget.meetingTime['timeStart']);
+    DateTime endTime = DateTime.parse(widget.meetingTime['timeEnd']);
 
     String formattedDate = DateFormat('dd MMMM yyyy', 'ru').format(startTime);
-    String formattedTime = '${DateFormat.Hm('ru').format(startTime)} - ${DateFormat.Hm('ru').format(endTime)}';
+    String formattedTime =
+        '${DateFormat.Hm('ru').format(startTime)} - ${DateFormat.Hm('ru').format(endTime)}';
 
     return Scaffold(
       appBar: AppBar(
@@ -119,105 +152,154 @@ class CheckoutPage extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Тапсырыс мәліметтері',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Icon(Icons.calendar_today, color: Colors.blue),
-                  SizedBox(width: 8),
-                  Text(
-                    formattedDate,
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Icon(Icons.access_time, color: Colors.blue),
-                  SizedBox(width: 8),
-                  Text(
-                    formattedTime,
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                '${expert['firstName']} ${expert['lastName']} маманымен консультация',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Консультация бағасы: ${expert['cost']} тг',
-                style: const TextStyle(fontSize: 16),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Соңғы баға: ${expert['cost']} тг',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Пошта',
-                  border: OutlineInputBorder(),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Тапсырыс мәліметтері',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: cardNumberController,
-                decoration: const InputDecoration(
-                  labelText: 'Карта нөмірі*',
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(Icons.calendar_today, color: Color(0xFF0085A1)),
+                    SizedBox(width: 8),
+                    Text(
+                      formattedDate,
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
                 ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: expiryDateController,
-                      decoration: const InputDecoration(
-                        labelText: 'Мерзімі*',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.datetime,
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Icon(Icons.access_time, color:Color(0xFF0085A1)),
+                    SizedBox(width: 8),
+                    Text(
+                      formattedTime,
+                      style: TextStyle(fontSize: 16),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: cvvController,
-                      decoration: const InputDecoration(
-                        labelText: 'CVV*',
-                        border: OutlineInputBorder(),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '${widget.expert['firstName']} ${widget.expert['lastName']} маманымен консультация',
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Консультация бағасы: ${widget.expert['cost']} тг',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Соңғы баға: ${widget.expert['cost']} тг',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: emailController,
+                  decoration: InputDecoration(
+                    labelText: 'Пошта',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(
+                        color: isEmailValid ? Colors.green : Colors.black,
+                        width: 2.0, // Increased border width
                       ),
-                      keyboardType: TextInputType.number,
-                      obscureText: true,
                     ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(
+                        color: isEmailValid ? Colors.green : Colors.black,
+                        width: 1.0, // Increased border width
+                      ),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(
+                        color: isEmailValid ? Colors.green : Color(0xFF0085A1),
+                        width: 2.3, // Increased border width
+                      ),
+                    ),
+                    errorText:
+                        emailError != null && !isEmailValid ? emailError : null,
+                    helperText: isEmailValid ? emailError : null,
+                    helperStyle: TextStyle(
+                        color: Colors.green, fontWeight: FontWeight.bold),
+                    errorStyle: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    bookConsultation(context, emailController.text);
+                  keyboardType: TextInputType.emailAddress,
+                  onChanged: _validateEmail,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Поштаны енгізіңіз';
+                    } else if (!EmailValidator.validate(value)) {
+                      return 'Жарамсыз пошта';
+                    }
+                    return null;
                   },
-                  child: const Text('Сатып алу'),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                TextField(
+                  controller: cardNumberController,
+                  decoration: InputDecoration(
+                    labelText: 'Карта нөмірі*',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: expiryDateController,
+                        decoration: InputDecoration(
+                          labelText: 'Мерзімі*',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        keyboardType: TextInputType.datetime,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: TextField(
+                        controller: cvvController,
+                        decoration: InputDecoration(
+                          labelText: 'CVV*',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        keyboardType: TextInputType.number,
+                        obscureText: true,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        bookConsultation(context, emailController.text);
+                      }
+                    },
+                    child: const Text('Сатып алу'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:llf/Widgets/Course/CourseCard.dart';
+import 'package:Finkomek/Widgets/Course/CourseCard.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -101,6 +101,7 @@ class _CoursesPageState extends State<CoursesPage> {
                           );
                         },
                         child: CourseCard(
+                          id:course.id,
                           title: course.name,
                           description: course.shortDescription,
                           courseImage: course.imageUrl,

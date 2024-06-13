@@ -85,9 +85,10 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('Username:${widget.expertName}');
     return Scaffold(
       appBar: AppBar(
-        title: Text('Чат с ${widget.expertName}'),
+        title: Text(widget.expertName),
         actions: [
           IconButton(
             icon: Icon(Icons.video_call),
@@ -95,8 +96,7 @@ class _ChatPageState extends State<ChatPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => VideoChatPage(
-                  ),
+                  builder: (context) => VideoChatPage(),
                 ),
               );
             },
@@ -112,9 +112,33 @@ class _ChatPageState extends State<ChatPage> {
                 itemCount: messages.length,
                 itemBuilder: (context, index) {
                   final message = messages[index];
-                  return ListTile(
-                    title: Text(message['username']!),
-                    subtitle: Text(message['message']!),
+                  final isCurrentUser = message['username'] == widget.userName;
+                  return Align(
+                    alignment:
+                    isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: isCurrentUser ? Colors.blue[100] : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      padding: EdgeInsets.all(12.0),
+                      margin: EdgeInsets.symmetric(vertical: 4.0),
+                      child: Column(
+                        crossAxisAlignment: isCurrentUser
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            message['username']!,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 4.0),
+                          Text(message['message']!),
+                        ],
+                      ),
+                    ),
                   );
                 },
               ),
@@ -126,9 +150,13 @@ class _ChatPageState extends State<ChatPage> {
                     controller: _controller,
                     decoration: InputDecoration(
                       hintText: 'Жазу...',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
                     ),
                   ),
                 ),
+                SizedBox(width: 8.0),
                 IconButton(
                   icon: Icon(Icons.send),
                   onPressed: _sendMessage,

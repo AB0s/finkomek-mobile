@@ -51,19 +51,19 @@ class _DebtPayOffCalculatorPageState extends State<DebtPayOffCalculatorPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   ListTile(
-                    title: const Text('Общая сумма'),
+                    title: const Text('Жалпы сома'),
                     trailing: Text(
                       '${_totalDebt.toInt()} ₸',
                       style: const TextStyle(fontSize: 16),
                     ),
                   ),
                   ListTile(
-                    title: const Text('Сумма товара'),
+                    title: const Text('Товар сомасы'),
                     trailing: Text('${_sum.toInt()} ₸',
                         style: const TextStyle(fontSize: 16)),
                   ),
                   ListTile(
-                    title: const Text('Переплата'),
+                    title: const Text('Артық төлем'),
                     trailing: Text(
                       '${_totalDebt.toInt() - _sum.toInt()} ₸',
                       style: const TextStyle(fontSize: 16),

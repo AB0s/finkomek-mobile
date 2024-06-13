@@ -2,18 +2,27 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class CourseCard extends StatelessWidget {
+import '../../Pages/Course/CourseDetail.dart';
+
+class CourseCard extends StatefulWidget {
+  final String id;
   final String title;
   final String description;
   final String courseImage;
 
   const CourseCard({
     Key? key,
+    required this.id,
     required this.title,
     required this.description,
     required this.courseImage,
   }) : super(key: key);
 
+  @override
+  State<CourseCard> createState() => _CourseCardState();
+}
+
+class _CourseCardState extends State<CourseCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -27,20 +36,29 @@ class CourseCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Image.asset(
-              courseImage.substring(1, courseImage.length - 3) + "png",
+              widget.courseImage.substring(1, widget.courseImage.length - 3) +
+                  "png",
               height: 150,
               width: double.infinity,
             ),
             const SizedBox(height: 15),
             Text(
-              title,
+              widget.title,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 10),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          CourseDetailPage(courseId: widget.id),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),

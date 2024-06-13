@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 
 class SavingsGoalCalculatorPage extends StatefulWidget {
   const SavingsGoalCalculatorPage({Key? key}) : super(key: key);
@@ -35,59 +36,70 @@ class _SavingsGoalCalculatorPageState extends State<SavingsGoalCalculatorPage> {
                 height: 20,
               ),
               const Text(
-                'Күтілетін үнемдеу сомасы',
+                'Жинақ мақсаттарының сомасы',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(
                 height: 5,
               ),
               TextField(
+                keyboardType: TextInputType.number,
                 controller: _sumController,
                 decoration: InputDecoration(
+                  prefix: const Text('₸ '),
                   isDense: true,
                   constraints: BoxConstraints.tight(const Size.fromHeight(40)),
-                  border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
                   hintText: 'Мөлшерін еңгізіңіз',
                 ),
+                inputFormatters: [
+                  CurrencyInputFormatter(),
+                ],
               ),
               const SizedBox(
                 height: 10,
               ),
               const Text(
-                'Қазіргі жинақтар',
+                'Қазіргі жинақ',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(
                 height: 5,
               ),
               TextField(
+                keyboardType: TextInputType.number,
                 controller: _currentSavingsController,
                 decoration: InputDecoration(
+                  prefix: const Text('₸ '),
                   isDense: true,
                   constraints: BoxConstraints.tight(const Size.fromHeight(40)),
-                  border:
-                      OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
                   hintText: 'Мөлшерін еңгізіңіз',
                 ),
+                inputFormatters: [
+                  CurrencyInputFormatter(),
+                ],
               ),
               const SizedBox(
                 height: 10,
               ),
               const Text(
-                'Айлық сақтау мөлшері',
+                'Айлық сақтау сомасы',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(
                 height: 5,
               ),
               TextField(
+                keyboardType: TextInputType.number,
                 controller: _monthlySavingsControler,
                 decoration: InputDecoration(
                   isDense: true,
                   constraints: BoxConstraints.tight(const Size.fromHeight(40)),
-                  border:
-                      OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8)),
                   hintText: 'Мөлшерін еңгізіңіз',
                 ),
               ),
@@ -99,7 +111,9 @@ class _SavingsGoalCalculatorPageState extends State<SavingsGoalCalculatorPage> {
                 child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF00343F)),
-                    onPressed: () {calculateSavingsGoal();},
+                    onPressed: () {
+                      calculateSavingsGoal();
+                    },
                     child: const Text(
                       'Есептеу',
                       style: TextStyle(color: Colors.white),
@@ -111,21 +125,19 @@ class _SavingsGoalCalculatorPageState extends State<SavingsGoalCalculatorPage> {
       ),
     );
   }
+
   void calculateSavingsGoal() {
+    double sumSavings =
+        double.tryParse(_sumController.text.replaceAll(',', '')) ?? 0.0;
 
-    double sumSavings = double.tryParse(
-        _sumController.text.replaceAll(',', '')) ??
-        0.0;
+    double currentSavings =
+        double.tryParse(_currentSavingsController.text.replaceAll(',', '')) ??
+            0.0;
+    double monthlySavings =
+        double.tryParse(_monthlySavingsControler.text.replaceAll(',', '')) ??
+            0.0;
 
-    double currentSavings = double.tryParse(
-        _currentSavingsController.text.replaceAll(',', '')) ??
-        0.0;
-    double monthlySavings = double.tryParse(
-        _monthlySavingsControler.text.replaceAll(',', '')) ??
-        0.0;
-
-    double futureTime =
-    (sumSavings-currentSavings)/monthlySavings;
+    double futureTime = (sumSavings - currentSavings) / monthlySavings;
     print(futureTime);
     showModalBottomSheet(
         context: context,

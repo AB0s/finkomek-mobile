@@ -202,7 +202,7 @@ class _CourseContentPageState extends State<CourseContentPage> {
                                   : const Color(0xFF0E7C9F)),
                       const SizedBox(width: 8),
                       Text(
-                        'Алдыңғы тарау',
+                        'Алдыңғы сабақ',
                         style: TextStyle(
                             color: currentLessonIndex == 0 &&
                                     currentModuleIndex == 0
@@ -225,7 +225,7 @@ class _CourseContentPageState extends State<CourseContentPage> {
                   ),
                   child: Row(
                     children: [
-                      Text(isLastLesson ? 'Басты бетке өту' : 'Келесі тарау'),
+                      Text(isLastLesson ? 'Басты бетке өту' : 'Келесі сабақ'),
                       const SizedBox(width: 8),
                       const Icon(Icons.arrow_forward),
                     ],
