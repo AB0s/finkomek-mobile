@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:email_validator/email_validator.dart';
-
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 import 'Success.dart';
 
 class CheckoutPage extends StatefulWidget {
@@ -212,14 +212,14 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isEmailValid ? Colors.green : Colors.black,
-                        width: 1.0,  // Increased border width
+                        width: 2.0,  // Increased border width
                       ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: BorderSide(
                         color: isEmailValid ? Colors.green : Color(0xFF0085A1),
-                        width: 2.3,  // Increased border width
+                        width: 2.0,  // Increased border width
                       ),
                     ),
                     errorText: emailError != null && !isEmailValid ? emailError : null,
@@ -246,6 +246,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(14))),
                   keyboardType: TextInputType.number,
+                  inputFormatters: [CreditCardNumberInputFormatter()],
                 ),
                 const SizedBox(height: 16),
                 Row(
@@ -258,6 +259,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(14))),
                         keyboardType: TextInputType.datetime,
+                        inputFormatters: [CreditCardExpirationDateFormatter()],
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -270,6 +272,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 borderRadius: BorderRadius.circular(14))),
                         keyboardType: TextInputType.number,
                         obscureText: true,
+                        inputFormatters: [CreditCardCvcInputFormatter()],
                       ),
                     ),
                   ],

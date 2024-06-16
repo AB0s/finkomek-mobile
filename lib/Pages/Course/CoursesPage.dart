@@ -23,6 +23,12 @@ class _CoursesPageState extends State<CoursesPage> {
     fetchCourses();
   }
 
+  @override
+  void dispose() {
+    // Add any additional disposal logic here
+    super.dispose();
+  }
+
   Future<void> fetchCourses() async {
     const url =
         'https://kamal-golang-back-b154d239f542.herokuapp.com/course/get-all-courses';
@@ -32,6 +38,7 @@ class _CoursesPageState extends State<CoursesPage> {
         final data = json
             .decode(utf8.decode(response.bodyBytes)); // Ensure UTF-8 encoding
         if (data['status'] == 'success') {
+          if (!mounted) return; // Check if the widget is still mounted
           setState(() {
             courses = (data['courses'] as List)
                 .map((courseJson) => Course.fromJson(courseJson))
@@ -39,19 +46,19 @@ class _CoursesPageState extends State<CoursesPage> {
             isLoading = false;
           });
         } else {
-          // Handle error
+          if (!mounted) return; // Check if the widget is still mounted
           setState(() {
             isLoading = false;
           });
         }
       } else {
-        // Handle error
+        if (!mounted) return; // Check if the widget is still mounted
         setState(() {
           isLoading = false;
         });
       }
     } catch (e) {
-      // Handle error
+      if (!mounted) return; // Check if the widget is still mounted
       setState(() {
         isLoading = false;
       });
@@ -65,56 +72,56 @@ class _CoursesPageState extends State<CoursesPage> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                  horizontal: MediaQuery.of(context).size.width * 0.05),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('Финтех Курстарымен танысыңыз',
-                      style:
-                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  const Text(
-                    'Оқу жолыңызды таңдаңыз, дағдыларыңызды дамытыңыз және біліміңізді шыңдаңыз. Барлығы бір жерде.',
-                    style: TextStyle(fontSize: 14),
-                  ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  ListView.separated(
-                    physics: const NeverScrollableScrollPhysics(),
-                    primary: false,
-                    shrinkWrap: true,
-                    itemCount: courses.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final course = courses[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  CourseDetailPage(courseId: course.id),
-                            ),
-                          );
-                        },
-                        child: CourseCard(
-                          id:course.id,
-                          title: course.name,
-                          description: course.shortDescription,
-                          courseImage: course.imageUrl,
-                        ),
-                      );
-                    },
-                    separatorBuilder: (BuildContext context, int index) =>
-                        const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 5)),
-                  ),
-                ],
-              ),
+        padding: EdgeInsets.symmetric(
+            horizontal: MediaQuery.of(context).size.width * 0.05),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Финтех Курстарымен танысыңыз',
+                style:
+                TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const SizedBox(
+              height: 10,
             ),
+            const Text(
+              'Оқу жолыңызды таңдаңыз, дағдыларыңызды дамытыңыз және біліміңізді шыңдаңыз. Барлығы бір жерде.',
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            ListView.separated(
+              physics: const NeverScrollableScrollPhysics(),
+              primary: false,
+              shrinkWrap: true,
+              itemCount: courses.length,
+              itemBuilder: (BuildContext context, int index) {
+                final course = courses[index];
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            CourseDetailPage(courseId: course.id),
+                      ),
+                    );
+                  },
+                  child: CourseCard(
+                    id:course.id,
+                    title: course.name,
+                    description: course.shortDescription,
+                    courseImage: course.imageUrl,
+                  ),
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) =>
+              const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 5)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

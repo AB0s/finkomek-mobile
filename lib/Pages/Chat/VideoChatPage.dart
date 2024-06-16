@@ -4,7 +4,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:agora_uikit/agora_uikit.dart';
 
 const String appId = "1e3ab4257f214ba3a0d88545a38a8895";
-const String token = "007eJxTYAj390qfLRfI+GPrtRPcOaeSrVjT6t9rmKtbmuyK8vNdkKjAYJhqnJhkYmRqnmZkaJKUaJxokGJhYWpimmhskWhhYWk64VFmWkMgI8PjyuOMjAwQCOKzM6RkFuTk5yYyMAAA4V8eoQ==";
+const String token = "007eJxTYMhwV/StMI9cpvNJ61v0tdNR4gdMFonHNvflLijd+0PIZLsCg2GqcWKSiZGpeZqRoUlSonGiQYqFhamJaaKxRaKFhaWphFZ2WkMgI4Oe4UlmRgYIBPHZGVIyC3LycxMZGAAiBR44";
 const String channel = "diploma";
 
 class VideoChatPage extends StatefulWidget {
@@ -129,7 +129,14 @@ class _VideoChatPageState extends State<VideoChatPage> {
           ),
           AgoraVideoButtons(
             client: client,
-            addScreenSharing: false, // Add this to enable screen sharing
+            addScreenSharing: false,
+            enabledButtons: [
+              BuiltInButtons.callEnd,
+              BuiltInButtons.switchCamera,
+              BuiltInButtons.toggleMic,
+              // BuiltInButtons.cloudRecording, // Uncomment if needed
+              // BuiltInButtons.screenSharing, // Uncomment if needed
+            ],
           ),
         ],
       ),

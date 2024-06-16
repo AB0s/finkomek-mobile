@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:email_validator/email_validator.dart';
 import 'ExpertDetail.page.dart';
+import 'package:flutter_multi_formatter/flutter_multi_formatter.dart';
 
 class CheckoutPage extends StatefulWidget {
   final Map<String, dynamic> expert;
@@ -229,7 +230,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     errorText:
                         emailError != null && !isEmailValid ? emailError : null,
                     helperText: isEmailValid ? emailError : null,
-                    helperStyle: TextStyle(
+                    helperStyle: const TextStyle(
                         color: Colors.green, fontWeight: FontWeight.bold),
                     errorStyle: TextStyle(fontWeight: FontWeight.bold),
                   ),
@@ -253,6 +254,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
+                  inputFormatters: [CreditCardNumberInputFormatter()],
                   keyboardType: TextInputType.number,
                 ),
                 const SizedBox(height: 16),
@@ -267,6 +269,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
+                        inputFormatters: [CreditCardExpirationDateFormatter()],
                         keyboardType: TextInputType.datetime,
                       ),
                     ),
@@ -280,6 +283,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                             borderRadius: BorderRadius.circular(14),
                           ),
                         ),
+                        inputFormatters: [CreditCardCvcInputFormatter()],
                         keyboardType: TextInputType.number,
                         obscureText: true,
                       ),
@@ -295,6 +299,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         bookConsultation(context, emailController.text);
                       }
                     },
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      foregroundColor: Colors.white,
+                      backgroundColor: const Color(0xFF0E7C9F),
+                    ),
                     child: const Text('Сатып алу'),
                   ),
                 ),

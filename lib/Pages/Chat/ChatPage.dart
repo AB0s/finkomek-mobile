@@ -85,7 +85,7 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    print('Username:${widget.expertName}');
+    print('Expert:${widget.expertName}');
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.expertName),
@@ -121,8 +121,8 @@ class _ChatPageState extends State<ChatPage> {
                         color: isCurrentUser ? Colors.blue[100] : Colors.grey[200],
                         borderRadius: BorderRadius.circular(12.0),
                       ),
-                      padding: EdgeInsets.all(12.0),
-                      margin: EdgeInsets.symmetric(vertical: 4.0),
+                      padding: const EdgeInsets.all(12.0),
+                      margin: const EdgeInsets.symmetric(vertical: 4.0),
                       child: Column(
                         crossAxisAlignment: isCurrentUser
                             ? CrossAxisAlignment.end
@@ -130,11 +130,11 @@ class _ChatPageState extends State<ChatPage> {
                         children: [
                           Text(
                             message['username']!,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          SizedBox(height: 4.0),
+                          const SizedBox(height: 4.0),
                           Text(message['message']!),
                         ],
                       ),
@@ -156,9 +156,9 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                   ),
                 ),
-                SizedBox(width: 8.0),
+                const SizedBox(width: 8.0),
                 IconButton(
-                  icon: Icon(Icons.send),
+                  icon: const Icon(Icons.send),
                   onPressed: _sendMessage,
                 ),
               ],

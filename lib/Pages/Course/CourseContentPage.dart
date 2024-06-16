@@ -225,7 +225,7 @@ class _CourseContentPageState extends State<CourseContentPage> {
                   ),
                   child: Row(
                     children: [
-                      Text(isLastLesson ? 'Басты бетке өту' : 'Келесі сабақ'),
+                      Text(isLastLesson ? 'Шығу' : 'Келесі сабақ'),
                       const SizedBox(width: 8),
                       const Icon(Icons.arrow_forward),
                     ],

@@ -21,6 +21,12 @@ class _ExpertsPageState extends State<ExpertsPage> {
     fetchExperts();
   }
 
+  @override
+  void dispose() {
+    // Add any additional disposal logic here
+    super.dispose();
+  }
+
   Future<void> fetchExperts() async {
     final url = 'https://kamal-golang-back-b154d239f542.herokuapp.com/expert/getAllExperts';
     try {
@@ -28,24 +34,25 @@ class _ExpertsPageState extends State<ExpertsPage> {
       if (response.statusCode == 200) {
         final data = json.decode(utf8.decode(response.bodyBytes));
         if (data['status'] == 'success') {
+          if (!mounted) return; // Check if the widget is still mounted
           setState(() {
             experts = data['experts'];
             isLoading = false;
           });
         } else {
-          // Handle error
+          if (!mounted) return; // Check if the widget is still mounted
           setState(() {
             isLoading = false;
           });
         }
       } else {
-        // Handle error
+        if (!mounted) return; // Check if the widget is still mounted
         setState(() {
           isLoading = false;
         });
       }
     } catch (e) {
-      // Handle error
+      if (!mounted) return; // Check if the widget is still mounted
       setState(() {
         isLoading = false;
       });
