@@ -134,8 +134,6 @@ class _VideoChatPageState extends State<VideoChatPage> {
               BuiltInButtons.callEnd,
               BuiltInButtons.switchCamera,
               BuiltInButtons.toggleMic,
-              // BuiltInButtons.cloudRecording, // Uncomment if needed
-              // BuiltInButtons.screenSharing, // Uncomment if needed
             ],
           ),
         ],
